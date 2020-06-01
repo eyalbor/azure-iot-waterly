@@ -6,17 +6,22 @@ import { fetchDevices } from '../../actions'
 class DeviceList extends React.Component {
 
     componentDidMount(){
-        this.props.fetchDevices();
+        if(this.props.currentUserId){
+            this.props.fetchDevices(this.props.currentUserId);
+        }
     }
 
     renderAdmin(device){
         if(device.userId === this.props.currentUserId){
             return (
                 <div className="right floated content">
-                <Link to={`/events/${device.id}`} className="ui button">
+                    <Link to={`/devices/realtime/${device.device_id}`} className="ui button">
+                        Sync
+                    </Link>
+                    <Link to={`/events/${device.device_id}`} className="ui secondary button">
                         Events
                     </Link>
-                    <Link to={`/devices/edit/${device.id}`} className="ui button primary">
+                    <Link to={`/devices/edit/${device.device_id}`} className="ui button primary">
                         Edit
                     </Link>
                     <button className="ui button negative">
@@ -29,13 +34,14 @@ class DeviceList extends React.Component {
 
     renderList(){
         if(this.props.isSignedIn){
+            console.log()
             return this.props.devices.map(device => {
                     return(
-                        <div className="item" key={device.id}>
+                        <div className="item" key={device.device_id}>
                             {this.renderAdmin(device)}
                             <i className="large middle aligned icon microchip"/>
                             <div className="content">
-                                {device.userId}
+                                {device.device_id}
                                 <div className="name">{device.name}</div>
                             </div>
                         </div>

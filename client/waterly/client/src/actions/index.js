@@ -33,8 +33,8 @@ export const createDevice = (formValues) => async (dispatch, getState) => {
     history.push('devices/list');
 };
 
-export const fetchDevices = () => async (dispatch) => {
-    const response = await myUrl.get('/devices');
+export const fetchDevices = (userId) => async (dispatch) => {
+    const response = await myUrl.get(`/devices/${userId}`);
     dispatch({type: FETCH_DEVICES, payload: response.data})
 };
 
@@ -54,7 +54,9 @@ export const deleteDevice = (id) => async dispatch => {
     dispatch({type: DELETE_DEVICE, payload: id})
 }
 
-export const fetchEvents = () => async (dispatch) => {
-    const response = await myUrl.get('/events');
+export const fetchEvents = (deviceId) => async (dispatch) => {
+    console.log(deviceId)
+    const response = await myUrl.get(`/events/${deviceId}`);
+    console.log(response)
     dispatch({type: FETCH_EVENTS, payload: response.data})
 };

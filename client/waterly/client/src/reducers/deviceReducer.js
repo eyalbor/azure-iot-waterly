@@ -10,7 +10,7 @@ import {
 export default (state = {}, action ) => {
     switch(action.type) {
         case FETCH_DEVICES:
-            return {...state, ..._.mapKeys(action.payload, 'id')};
+            return {...state, ..._.mapKeys(action.payload, 'device_id')};
         case FETCH_DEVICE:
             return {...state, [action.payload.id]: action.payload};
         case CREATE_DEVICE:
@@ -18,7 +18,7 @@ export default (state = {}, action ) => {
         case EDIT_DEVICE:
             return {...state, [action.payload.id]: action.payload};
         case DELETE_DEVICE:
-            return _.omit(state, action.payload)
+            return _.omit(state, action.payload);
         default:
             return state;
     }
