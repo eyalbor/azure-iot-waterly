@@ -1,0 +1,86 @@
+{
+  "devices": [
+    {
+      "id": "1",
+      "userId": "100034411967853931768",
+      "name": "laundry-machine",
+      "address": {
+        "city": "Tel Aviv",
+        "street": "HaBashan",
+        "building_num": 7,
+        "apt_num": 8
+      }
+    },
+    {
+      "id": "2",
+      "userId": "100034411967853931768",
+      "name": "kitchen",
+      "address": {
+        "city": "Tel Aviv",
+        "street": "HaBashan",
+        "building_num": 7,
+        "apt_num": 8
+      }
+    },
+    {
+      "id": "3",
+      "userId": "100034411967853931768",
+      "name": "shower",
+      "address": {
+        "city": "Tel Aviv",
+        "street": "HaBashan",
+        "building_num": 7,
+        "apt_num": 8
+      }
+    },
+    {
+      "id": "4",
+      "userId": "2",
+      "name": "laundry-machine",
+      "address": {
+        "city": "Herzelia",
+        "street": "bar",
+        "building_num": 3,
+        "apt_num": 6
+      }
+    },
+    {
+      "name": "test",
+      "address": {
+        "city": "arad",
+        "street": "hi",
+        "building_num": "1",
+        "apt_num": "1"
+      },
+      "userId": "100034411967853931768",
+      "id": "WWMYLf-"
+    }
+  ],
+  "events": [
+    {
+      "deviceId": "1",
+      "timestamp": "2014-09-15T23:14:25.7251173Z",
+      "water_read": 100
+    },
+    {
+      "deviceId": "1",
+      "timestamp": "2014-10-15T23:14:25.7251173Z",
+      "water_read": 200
+    },
+    {
+      "deviceId": "1",
+      "timestamp": "2014-11-15T23:14:25.7251173Z",
+      "water_read": 300
+    },
+    {
+      "deviceId": "2",
+      "timestamp": "2014-09-15T23:14:25.7251173Z",
+      "water_read": 100
+    },
+    {
+      "deviceId": "3",
+      "timestamp": "2014-09-15T23:14:25.7251173Z",
+      "water_read": 0
+    }
+  ]
+}
