@@ -19,7 +19,7 @@ class EventsList extends React.Component {
                         <div className="item" key={event.id}>
                             <i className="large middle aligned icon bolt"/>
                             <div className="content">
-                                <div className="water_read"><b>Water Read:</b> {event.water_read}</div>
+                                <div className="water_read"><b>Reading time:</b> {event.water_read}</div>
                                 <div className="timestamp"><b>Timestamp:</b> {renderTime(event.timestamp)}</div>
                             </div>
                         </div>

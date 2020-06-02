@@ -46,8 +46,8 @@ class DeviceList extends React.Component {
                                 <a className="header">{device.device_id}</a>
                                 <div className="description">
                                     <div className="name">{device.name}</div>
-                                    <div className="last_water_read"><b>Water flow:</b> {device.last_water_read}</div>
-                                    <div className="last_update_timestamp"><b>Timestamp:</b>{renderTime(device.last_update_timestamp)}</div>
+                                    <div className="last_water_read"><b>Meter reading:</b> {device.last_water_read}</div>
+                                    <div className="last_update_timestamp"><b>Last update:</b>{renderTime(device.last_update_timestamp)}</div>
                                 </div>
                             </div>
                         </div>
