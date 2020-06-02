@@ -6,6 +6,7 @@ import { fetchDevices } from '../../actions'
 class DeviceList extends React.Component {
 
     componentDidMount(){
+        console.log(this.props.currentUserId)
         if(this.props.currentUserId){
             this.props.fetchDevices(this.props.currentUserId);
         }
