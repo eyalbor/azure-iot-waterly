@@ -12,7 +12,7 @@ class HomePage extends React.Component {
                             Waterly
                         </h1>
                         <h2>Keep your water safe.</h2>
-                        <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div>
+                        {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
                     </div>
                 </div>
                 <Footer className="footer"/>

@@ -10,15 +10,28 @@ class EventsList extends React.Component {
         }
     }
 
+    renderTime(timestamp){
+        // sometimes even the US needs 24-hour time
+        let options = {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            hour12: false,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+        };
+        // to specify options but use the browser's default locale, use 'default'
+        return new Intl.DateTimeFormat('default', options).format(timestamp);
+    }
+
     renderList(){
+
         if(this.props.isSignedIn){
             return this.props.events.map(event => {
                     return(
-                        <div className="item" key={event.timestamp}>
+                        <div className="item" key={event.id}>
                             <i className="large middle aligned icon bolt"/>
                             <div className="content">
-                                <div className="water_read">Water Read:{event.water_read}</div>
-                                <div className="timestamp">Time: {event.timestamp}</div>
+                                <div className="water_read">Water Read: {event.water_read}</div>
+                                <div className="timestamp">Time: {this.renderTime(event.timestamp*1000)}</div>
                             </div>
                         </div>
                     );
