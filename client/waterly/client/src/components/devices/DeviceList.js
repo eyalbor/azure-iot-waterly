@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { fetchDevices } from '../../actions'
+import { renderTime } from '../../actions/timestamp'
 
 class DeviceList extends React.Component {
 
@@ -16,9 +17,9 @@ class DeviceList extends React.Component {
         if(device.userId === this.props.currentUserId){
             return (
                 <div className="right floated content">
-                    <Link to={`/devices/realtime/${device.device_id}`} className="ui button">
+                    <div className="ui button">
                         Sync
-                    </Link>
+                    </div>
                     <Link to={`/events/${device.device_id}`} className="ui secondary button">
                         Events
                     </Link>
@@ -42,8 +43,12 @@ class DeviceList extends React.Component {
                             {this.renderAdmin(device)}
                             <i className="large middle aligned icon microchip"/>
                             <div className="content">
-                                {device.device_id}
-                                <div className="name">{device.name}</div>
+                                <a className="header">{device.device_id}</a>
+                                <div className="description">
+                                    <div className="name">{device.name}</div>
+                                    <div className="last_water_read"><b>Water flow:</b> {device.last_water_read}</div>
+                                    <div className="last_update_timestamp"><b>Timestamp:</b>{renderTime(device.last_update_timestamp)}</div>
+                                </div>
                             </div>
                         </div>
                     );
