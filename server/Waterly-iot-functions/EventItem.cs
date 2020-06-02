@@ -20,7 +20,9 @@ namespace Waterly_iot_functions
         public string device_id { get; set; }
 
         public float water_read { get; set; }
-        public float timestamp { get; set; }
+        public long timestamp { get; set; } 
+
+        public string id { get; set; }
 
 
     }
@@ -35,6 +37,8 @@ namespace Waterly_iot_functions
         public Address address { get; set; }
 
         public float last_water_read { get; set; }
+
+        public string id { get; set; }
 
 
     }
