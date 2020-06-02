@@ -5,7 +5,11 @@ export const renderTime = (timestamp) => {
         hour12: false,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone 
     };
-    
-    // to specify options but use the browser's default locale, use 'default'
-    return new Intl.DateTimeFormat('default', options).format(timestamp*1000);
+    if(timestamp > 0){
+        // to specify options but use the browser's default locale, use 'default'
+        return new Intl.DateTimeFormat('default', options).format(timestamp*1000);
+    } else {
+        return null;
+    }
+
 }
