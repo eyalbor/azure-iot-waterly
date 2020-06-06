@@ -40,6 +40,7 @@ export const fetchDevices = (userId) => async (dispatch) => {
 
 export const fetchDevice = (id) => async dispatch => {
     const response = await myUrl.get(`/devices/${id}`);
+    console.log("fetch device " + response.data)
     dispatch({type: FETCH_DEVICE, payload: response.data})
 }
 

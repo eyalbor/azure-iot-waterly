@@ -7,10 +7,11 @@ import { renderTime } from '../../actions/timestamp'
 class DeviceList extends React.Component {
 
     componentDidMount(){
-        console.log(this.props.currentUserId)
-        if(this.props.currentUserId){
-            this.props.fetchDevices(this.props.currentUserId);
-        }
+        
+        console.log("componentDidMount "+this.props.currentUserId)
+        // if(this.props.currentUserId){
+        //     this.props.fetchDevices(this.props.currentUserId);
+        // }
     }
 
     renderAdmin(device){
@@ -36,7 +37,7 @@ class DeviceList extends React.Component {
 
     renderList(){
         if(this.props.isSignedIn){
-            console.log()
+            this.props.fetchDevices(this.props.currentUserId);
             return this.props.devices.map(device => {
                     return(
                         <div className="item" key={device.device_id}>

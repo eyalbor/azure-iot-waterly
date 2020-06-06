@@ -6,7 +6,7 @@ import DeviceForm from './DeviceForm'
 
 class DeviceEdit extends React.Component {
     componentDidMount(){
-        this.props.fetchDevice(this.props.match.params.id);
+        //this.props.fetchDevice(this.props.match.params.id);
     }
 
     onSumbit = (formValues) => {
