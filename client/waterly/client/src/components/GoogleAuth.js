@@ -71,3 +71,7 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps,
     {signIn, signOut}
 )(GoogleAuth);
+
+//https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
+//https://stackoverflow.com/questions/47476186/when-user-is-not-logged-in-redirect-to-login-reactjs
+//https://tylermcginnis.com/react-router-protected-routes-authentication/

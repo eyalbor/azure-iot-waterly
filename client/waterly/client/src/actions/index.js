@@ -33,9 +33,9 @@ export const createDevice = (formValues) => async (dispatch, getState) => {
     history.push('devices/list');
 };
 
-export const fetchDevices = (userId) => async (dispatch) => {
-    const response = await myUrl.get(`/devices/${userId}`);
-    dispatch({type: FETCH_DEVICES, payload: response.data})
+export const fetchDevices = (userId) =>{
+    return myUrl.get(`/devices/${userId}`);
+    //dispatch({type: FETCH_DEVICES, payload: response.data})
 };
 
 export const fetchDevice = (id) => async dispatch => {
