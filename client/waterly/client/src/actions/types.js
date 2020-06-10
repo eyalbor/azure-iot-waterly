@@ -8,3 +8,5 @@ export const DELETE_DEVICE = 'DELETE_DEVICE';
 export const EDIT_DEVICE = 'EDIT_DEVICE';
 
 export const FETCH_EVENTS = 'FETCH_EVENTS';
+
+export const FETCH_NOTIFICATIONS = 'FETCH_NOTIFICATIONS';
