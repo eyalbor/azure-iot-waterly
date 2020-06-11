@@ -18,16 +18,16 @@ class Header extends React.Component {
 
     showIfSignin(){
         if(this.props.isSignedIn){
+            console.log(this.props.notifications.length)
             return( <div className="right menu">
-                    <Link className="item" onClick={this.showNotifications()}>
-                    {/* badgeContent={4} */}
-                        <Badge color="error" anchorOrigin={{
+                    <button  className="ui secondary icon button" onClick={this.showNotifications}>
+                        <Badge badgeContent={this.props.notifications.length} color="error" anchorOrigin={{
                             vertical: 'bottom',
                             horizontal: 'right',
                         }}>
                             <NotificationsNoneIcon fontSize="large"/>
                         </Badge>
-                    </Link>
+                    </button >
                     <Link to="/devices/list" className="item">
                         DashBoard
                     </Link>
@@ -60,7 +60,7 @@ const mapStateToProps = (state, ownProps) => {
     return {
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn,
-        notifications: state.notifications
+        notifications: Object.values(state.notifications)
     }
 }
 

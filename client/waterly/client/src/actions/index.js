@@ -28,7 +28,8 @@ export const signOut = ()=>{
 
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
-    const response = await myUrl.get(`/notifications/${userId}`);
+    const response = await myUrl.get(`/notifications`);
+    //const response = await myUrl.get(`/notifications/${userId}`);
     dispatch({type: FETCH_NOTIFICATIONS, payload: response.data})
 };
 
