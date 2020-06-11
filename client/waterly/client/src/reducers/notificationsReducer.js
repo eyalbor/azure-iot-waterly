@@ -6,7 +6,7 @@ import {
 export default (state = {}, action ) => {
     switch(action.type) {
         case FETCH_NOTIFICATIONS:
-            return {...state,  [action.payload.id]: action.payload};
+            return {...state,  ..._.mapKeys(action.payload, 'id')};
         default:
             return state;
     }
