@@ -9,10 +9,11 @@ class HomePage extends React.Component {
                 <div className="ui vertical masthead center aligned segment">
                     <div className="ui text container">
                         <h1 className="ui violet header">
-                            Waterly
+                            <b>Waterly</b>
                         </h1>
                         <h2>Keep your water safe.</h2>
                         {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
+                        <img alt="kineret" src="/kineret.png" className="ui medium centered image"/>
                     </div>
                 </div>
                 <Footer className="footer"/>

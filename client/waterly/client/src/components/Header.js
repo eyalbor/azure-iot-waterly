@@ -16,29 +16,37 @@ class Header extends React.Component {
         console.log("showNotifications")
     }
 
+    showIfSignin(){
+        if(this.props.isSignedIn){
+            return( <div className="right menu">
+                    <Link className="item" onClick={this.showNotifications()}>
+                    {/* badgeContent={4} */}
+                        <Badge color="error" anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}>
+                            <NotificationsNoneIcon fontSize="large"/>
+                        </Badge>
+                    </Link>
+                    <Link to="/devices/list" className="item">
+                        DashBoard
+                    </Link>
+                    <Link to="/bill/show" className="item">
+                        Pay Bill
+                    </Link>
+                </div>
+            );
+        }
+    }
+
     render() {
         return (
         <div className="ui massive inverted menu">
             <Link to="/" className="header item">
                 Waterly
             </Link>
-            
             <div className="right menu">
-                <Link className="item" onClick={this.showNotifications()}>
-                {/* badgeContent={4} */}
-                    <Badge color="error" anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right',
-                    }}>
-                        <NotificationsNoneIcon fontSize="large"/>
-                    </Badge>
-                </Link>
-                <Link to="/devices/list" className="item">
-                    Dashboard
-                </Link>
-                <Link to="/bill/show" className="item">
-                    Pay Bill
-                </Link>
+                {this.showIfSignin()}
                 <div className="item">
                     <GoogleAuth/>
                 </div>

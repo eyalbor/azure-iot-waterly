@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import api from '../../apis/axios'
 
 import { renderTime } from '../../actions/timestamp'
 
@@ -49,11 +49,6 @@ const tableIcons = {
     SyncIcon: forwardRef((props, ref) => <SyncIcon {...props} ref={ref} />),
     EventIcon: forwardRef((props, ref) => <EventIcon {...props} ref={ref} />),
 };
-
-const api = axios.create({
-    baseURL: `https://waterly-iot-functions.azurewebsites.net/api`
-})
-
 
 const DeviceTable = ({userId}) => {
     var columns = [

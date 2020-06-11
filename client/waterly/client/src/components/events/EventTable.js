@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { forwardRef } from 'react';
 import { renderTime } from '../../actions/timestamp'
+import api from '../../apis/axios'
 
 import Grid from '@material-ui/core/Grid'
 import { makeStyles } from '@material-ui/core/styles';
@@ -43,10 +44,6 @@ const tableIcons = {
   ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
-
-const api = axios.create({
-  baseURL: `https://waterly-iot-functions.azurewebsites.net/api`
-})
 
 const useStyles = makeStyles((theme) => ({
     root: {
