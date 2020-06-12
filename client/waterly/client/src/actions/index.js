@@ -7,7 +7,8 @@ import {
     DELETE_DEVICE,
     EDIT_DEVICE,
     FETCH_EVENTS,
-    FETCH_NOTIFICATIONS
+    FETCH_NOTIFICATIONS,
+    FETCH_BILLS
 } from './types'
 import myUrl from '../apis/axios'
 
@@ -24,7 +25,13 @@ export const signOut = ()=>{
     return {
         type: SIGN_OUT
     }
-}; 
+};
+
+export const fetchBills = () => async (dispatch, getState) => {
+    const { userId } = getState().auth;
+    const response = await myUrl.get(`/bills`);
+    dispatch({type: FETCH_BILLS, payload: response.data})
+}
 
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;

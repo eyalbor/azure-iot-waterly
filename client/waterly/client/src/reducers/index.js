@@ -4,6 +4,7 @@ import authReducer from './authReducer';
 import deviceReducer from './deviceReducer'
 import eventReducer from './eventReducer'
 import notificationsReducer from './notificationsReducer'
+import billsReducer from './billReducer'
 
 
 export default combineReducers({
@@ -11,5 +12,6 @@ export default combineReducers({
     form: formReducer,
     devices: deviceReducer,
     events: eventReducer,
-    notifications: notificationsReducer
+    notifications: notificationsReducer,
+    bills: billsReducer
 });
