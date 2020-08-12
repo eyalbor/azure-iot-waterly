@@ -1,5 +1,5 @@
 import React from 'react';
-import { Router, Route, Redirect } from 'react-router-dom'
+import { Router, Route, Switch } from 'react-router-dom'
 import DeviceCreate from './devices/DeviceCreate'
 import DeviceDelete from './devices/DeviceDelete'
 import DeviceEdit from './devices/DeviceEdit'
@@ -16,7 +16,7 @@ const App = () => {
     <div>
       <Router history={history}>
           <Header/>
-            <div>
+            <Switch>
               <Route path="/" exact component={HomePage}/>
               <Route path="/devices/list" exact component={DeviceList}/>
               <Route path="/bill/show" exact component={BillShow}/>
@@ -24,9 +24,8 @@ const App = () => {
               <Route path="/devices/edit/:id" exact component={DeviceEdit}/>
               <Route path="/devices/delete" exact component={DeviceDelete}/>
               <Route path="/events/:id" exact component={EventsList}/>
-              <Route path="/404" component={Notfound} />
-              <Route path="*" render={() => <Redirect to="/404" />} />
-            </div>
+              <Route component={Notfound} />
+            </Switch>
       </Router>
     </div>
   );

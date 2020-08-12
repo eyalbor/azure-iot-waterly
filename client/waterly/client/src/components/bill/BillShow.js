@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { fetchBills } from '../../actions'
-
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Paper from '@material-ui/core/Paper';
 import {
     Chart,
@@ -39,8 +39,21 @@ const Label = withStyles(legendLabelStyles, { name: 'LegendLabel' })(legendLabel
 
 class BillShow extends React.Component {
 
+    constructor(props) {
+        super(props)
+        this.state = {
+            modal: false,
+            bill: null
+        }
+    }
+
     componentDidMount(){
         this.props.fetchBills();
+    }
+
+    toggle = (bill) => {
+        console.log(bill)
+        this.setState({modal: !this.state.modal, bill: bill})
     }
 
     renderCards(){
@@ -90,7 +103,7 @@ class BillShow extends React.Component {
                         </div>
                     </div>
                     <div className="extra content">
-                        <button className="ui primary button">Pay</button>
+                        <button className="ui primary button" onClick={()=>this.toggle(bill)}>Pay</button>
                     </div>
                 </div>
             )
@@ -99,11 +112,25 @@ class BillShow extends React.Component {
 
     render(){
         return (
-            <div className="ui container">
-                <div className="ui special cards">
-                    {this.renderCards()}
+            <>
+                <div className="ui container">
+                    <div className="ui special cards">
+                        {this.renderCards()}
+                    </div>
                 </div>
-            </div>
+
+                <Modal isOpen={this.state.modal} toggle={this.toggle}>
+                    <ModalHeader toggle={this.toggle}>Paying Method</ModalHeader>
+                    <ModalBody>
+                        The customer will choose how to pay the bill.<br/>
+                        Amount: {this.state.modal? this.state.bill.money.total_price:''}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={this.toggle}>Confirm</Button>{' '}
+                        <Button color="secondary" onClick={this.toggle}>Cancel</Button>
+                    </ModalFooter>
+                </Modal>
+            </>
         )
     }
   
