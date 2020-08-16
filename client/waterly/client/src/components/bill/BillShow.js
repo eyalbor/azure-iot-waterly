@@ -19,7 +19,7 @@ const legendStyles = () => ({
     root: {
         display: 'flex',
         margin: 'auto',
-        flexDirection: 'row',
+        flexDirection: 'row'
     },
 });
 
