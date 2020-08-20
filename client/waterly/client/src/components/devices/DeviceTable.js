@@ -52,9 +52,9 @@ const tableIcons = {
 
 const DeviceTable = ({userId}) => {
     var columns = [
-        {title: "Id", field: "device_id"},
+        {title: "Device id", field: "device_id"},
         {title: "Name", field: "name"},
-        {title: "Meter Reading", field: "last_water_read"},
+        {title: "Meter Reading [m^3/s]", field: "last_water_read"},
         {title: "Last Update", field: "last_update_timestamp", render: rowData => renderTime(rowData.last_update_timestamp)}
     ]
     const [data, setData] = useState([]); //table data
@@ -65,7 +65,7 @@ const DeviceTable = ({userId}) => {
     const [errorMessages, setErrorMessages] = useState([])
 
     useEffect(() => { 
-        api.get(`/devices/${userId}`)
+        api.get(`/devices?userId=${userId}`)
             .then(res => {             
                 setData(res.data)
             })
@@ -174,8 +174,8 @@ const DeviceTable = ({userId}) => {
                             onClick: (event, rowData) =>
                                 console.log("You are sync " + rowData)
                         }),
-                        rowData => ({
-                            icon: () => <Link style={{ color: '#000' }} to={`/events/${rowData.device_id}`}><EventIcon/></Link>,
+                        rowData =>({
+                            icon: () => <Link style={{ color: '#000' }} to={`/events/device/${rowData.device_id}`}><EventIcon/></Link>,
                             tooltip: "Device Events",
                         }),
                         rowData => ({

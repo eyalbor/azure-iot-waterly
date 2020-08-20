@@ -54,9 +54,10 @@ const useStyles = makeStyles((theme) => ({
 const EventTable = ({deviceId}) => {
     const classes = useStyles();
   var columns = [
-    {title: "Id", field: "device_id"},
     {title: "Meter reading", field: "water_read"},
-    {title: "Reading time", field: "timestamp", render: rowData => renderTime(rowData.timestamp)}
+    {title: "Reading time", field: "timestamp", render: rowData => renderTime(rowData.timestamp)},
+    {title: "PH", field: "ph"},
+    {title: "Pressure [atm]", field: "pressure"},
   ]
   const [data, setData] = useState([]); //table data
   const [selectedRow, setSelectedRow] = useState(null);
@@ -66,7 +67,7 @@ const EventTable = ({deviceId}) => {
   const [errorMessages] = useState([])
 
   useEffect(() => { 
-    api.get(`/events/${deviceId}`)
+    api.get(`/events?device_id=${deviceId}`)
         .then(res => {            
             console.log(res)   
             setData(res.data)
@@ -91,7 +92,7 @@ const EventTable = ({deviceId}) => {
             }       
           </div>
             <MaterialTable
-                title="Device Events"
+                title=""
                 columns={columns}
                 data={data}
                 icons={tableIcons}

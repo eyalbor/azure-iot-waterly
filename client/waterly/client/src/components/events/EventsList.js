@@ -20,7 +20,7 @@ class EventsList extends React.Component {
     render(){
         return (
             <div className="ui container">
-                {/* <h2>Device <u>{this.props.deviceId}</u> Events</h2> */}
+                <h3>Device <u>{this.props.deviceId}</u> Events</h3>
                 {this.renderList()}
             </div>
         );
@@ -28,8 +28,9 @@ class EventsList extends React.Component {
 };
 
 const mapStateToProps = (state, ownProps) => {
+    console.log(ownProps)
     return {
-        deviceId: ownProps.match.params.id,
+        deviceId: ownProps.match.params.device_id,
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn
     }

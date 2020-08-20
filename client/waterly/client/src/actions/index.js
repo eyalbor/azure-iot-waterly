@@ -49,7 +49,8 @@ export const createDevice = (formValues) => async (dispatch, getState) => {
 };
 
 export const fetchDevices = (userId) =>{
-    return myUrl.get(`/devices/${userId}`);
+    //return myUrl.get(`/devices/${userId}`);
+    return myUrl.get(`/devices?userId=${userId}`);
     //dispatch({type: FETCH_DEVICES, payload: response.data})
 };
 
