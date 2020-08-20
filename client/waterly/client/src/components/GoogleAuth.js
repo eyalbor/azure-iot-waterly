@@ -13,6 +13,8 @@ class GoogleAuth extends React.Component {
             }).then(() => {
                 //init return promise
                 this.auth = window.gapi.auth2.getAuthInstance();
+                //email
+                //console.log(this.auth.currentUser.le.tt.bu)
                 //update component state
                 this.onAuthChange(this.auth.isSignedIn.get());
                 //so we need to init isSignedIn when component create

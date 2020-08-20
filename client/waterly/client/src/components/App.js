@@ -10,6 +10,8 @@ import Header from './Header';
 import HomePage from './HomePage'
 import Notfound from './NoFound'
 import history from '../history'
+import ProtectedRoute from '../actions/ProtectedRoute'
+import Notifications from './notifications/NotificationPage';
 
 const App = () => {
   return (
@@ -18,12 +20,13 @@ const App = () => {
           <Header/>
             <Switch>
               <Route path="/" exact component={HomePage}/>
-              <Route path="/devices/list" exact component={DeviceList}/>
-              <Route path="/bill/show" exact component={BillShow}/>
-              <Route path="/devices/new" exact component={DeviceCreate}/>
-              <Route path="/devices/edit/:id" exact component={DeviceEdit}/>
-              <Route path="/devices/delete" exact component={DeviceDelete}/>
-              <Route path="/events/:id" exact component={EventsList}/>
+              <ProtectedRoute path="/devices/list" exact component={DeviceList}/>
+              <ProtectedRoute path="/bill/show" exact component={BillShow}/>
+              <ProtectedRoute path="/devices/new" exact component={DeviceCreate}/>
+              <ProtectedRoute path="/devices/edit/:id" exact component={DeviceEdit}/>
+              <ProtectedRoute path="/devices/delete" exact component={DeviceDelete}/>
+              <ProtectedRoute path="/events/:id" exact component={EventsList}/>
+              <Route path="/Notifications" exact component={Notifications}/>
               <Route component={Notfound} />
             </Switch>
       </Router>

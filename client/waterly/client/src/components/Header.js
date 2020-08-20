@@ -9,8 +9,11 @@ import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
 
 class Header extends React.Component {
 
-    componentDidMount(){
-        this.props.fetchNotifications();
+    componentDidUpdate(prevProps, prevState) {
+        console.log(prevProps)
+        if(prevProps.isSignedIn !== this.props.isSignedIn) {
+            this.props.fetchNotifications();
+        }  
     }
 
     showNotifications(){
@@ -34,8 +37,9 @@ class Header extends React.Component {
 
     showIfSignin(){
         if(this.props.isSignedIn){
-            console.log(this.props.notifications.length)
-            return( <div className="right menu">
+            //console.log(this.props.notifications.length)
+            return( 
+                <div className="right menu">
                     <button  className="ui secondary icon simple dropdown button">
                         <Badge badgeContent={this.props.notifications.length} color="error" anchorOrigin={{
                             vertical: 'bottom',
@@ -49,15 +53,18 @@ class Header extends React.Component {
                                 Alerts
                             </div>
                             <div className="divider"></div>
-                            <div className="ui list" style={{padding: "20px"}}>{this.showNotifications()}</div>
-                            <div className="divider"></div>
+                            <div className="ui list" style={{padding: "20px"}}>
+                                {this.showNotifications()}
+                                <div className="divider"></div>
+                                <a href={'/notifications'}>See All Alert</a>
+                            </div>
                         </div>
                     </button >
                     <Link to="/devices/list" className="item">
                         Dashboard
                     </Link>
                     <Link to="/bill/show" className="item">
-                        Pay Bill
+                        Pay Bills
                     </Link>
                 </div>
             );
@@ -81,11 +88,11 @@ class Header extends React.Component {
     }
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return {
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn,
-        notifications: Object.values(state.notifications)
+        notifications: Object.values(state.notifications).filter(o => o.status === true)
     }
 }
 

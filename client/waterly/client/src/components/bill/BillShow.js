@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { fetchBills } from '../../actions'
+import { fetchBills, payForBill } from '../../actions'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Paper from '@material-ui/core/Paper';
 import {
@@ -56,7 +56,26 @@ class BillShow extends React.Component {
         this.setState({modal: !this.state.modal, bill: bill})
     }
 
+    showPayButton(bill){
+        if(!bill.status){
+            return(
+                <div className="extra content">
+                    <button className="ui primary button" onClick={()=>this.toggle(bill)}>Pay</button>
+                </div>
+            );
+        }
+    }
+
+    pay = (bill) => {
+        console.log('pay')
+        console.log(bill)
+        bill.status = true
+        this.props.payForBill(bill);
+        this.toggle()
+    }
+
     renderCards(){
+        console.log(this.props.bills)
         return this.props.bills.map(bill => {
             return (      
                 <div className="ui card" key={bill.id} style={{padding: "20px", margin:"20px"}}>
@@ -79,6 +98,8 @@ class BillShow extends React.Component {
                                     Water expenses: <a>{bill.money.water_expenses} ILS</a>
                                     <br/>
                                     Fixed expenses: <a>{bill.money.fixed_expenses} ILS</a>
+                                    <br/>
+                                    <b>Total price: {bill.money.water_expenses+bill.money.fixed_expenses} ILS</b>
                                 </div>
                                 </div>
                             </div>
@@ -86,7 +107,9 @@ class BillShow extends React.Component {
                                 <div className="content">
                                 <div className="summary">
                                     <Paper>
-                                        <Chart data={[{month:`${bill.time.month}`, user: bill.total_flow , avg: 100}]}>
+                                        <Chart data={[{month:`${bill.time.month}`,
+                                         user: bill.money.water_expenses+bill.money.fixed_expenses ,
+                                         avg: bill.avg}]}>
                                             <ArgumentAxis/>
                                             <ValueAxis/>
                                             <BarSeries name="User" valueField="user" argumentField="month" color="#ffd700"/>
@@ -102,9 +125,7 @@ class BillShow extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="extra content">
-                        <button className="ui primary button" onClick={()=>this.toggle(bill)}>Pay</button>
-                    </div>
+                    {this.showPayButton(bill)}
                 </div>
             )
         })
@@ -123,10 +144,10 @@ class BillShow extends React.Component {
                     <ModalHeader toggle={this.toggle}>Paying Method</ModalHeader>
                     <ModalBody>
                         The customer will choose how to pay the bill.<br/>
-                        Amount: {this.state.modal? this.state.bill.money.total_price:''}
+                        Amount: {this.state.modal? this.state.bill.money.water_expenses+this.state.bill.money.fixed_expenses:''}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={this.toggle}>Confirm</Button>{' '}
+                        <Button color="primary" onClick={() => this.pay(this.state.bill)}>Confirm</Button>{' '}
                         <Button color="secondary" onClick={this.toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>
@@ -144,4 +165,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, {fetchBills})(BillShow);
+export default connect(mapStateToProps, {fetchBills, payForBill})(BillShow);
