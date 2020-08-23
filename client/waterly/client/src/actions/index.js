@@ -1,14 +1,19 @@
 import {
     SIGN_IN,
     SIGN_OUT,
+    SET_USER,
+
     CREATE_DEVICE,
     FETCH_DEVICE,
     FETCH_DEVICES,
     DELETE_DEVICE,
     EDIT_DEVICE,
+
     FETCH_EVENTS,
+
     FETCH_NOTIFICATIONS,
     EDIT_NOTIFICATION,
+
     FETCH_BILLS,
     PAY_BILL
 } from './types'
@@ -27,6 +32,12 @@ export const signOut = ()=>{
         type: SIGN_OUT
     }
 };
+
+export const setUser = (user) =>  (dispatch) => {
+    //console.log(user)
+    dispatch({type: SET_USER, payload: user})
+}
+
 
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
@@ -48,10 +59,11 @@ export const createDevice = (formValues) => async (dispatch, getState) => {
     history.push('devices/list');
 };
 
-export const fetchDevices = (userId) =>{
+export const fetchDevices = () =>  async (dispatch, getState) => {
+    const { userId } = getState().auth;
     //return myUrl.get(`/devices/${userId}`);
-    return myUrl.get(`/devices?userId=${userId}`);
-    //dispatch({type: FETCH_DEVICES, payload: response.data})
+    const response = await myUrl.get(`/devices?userId=${userId}`);
+    dispatch({type: FETCH_DEVICES, payload: response.data})
 };
 
 export const fetchDevice = (id) => async dispatch => {
@@ -72,9 +84,9 @@ export const deleteDevice = (id) => async dispatch => {
 }
 
 export const fetchEvents = (deviceId) => async (dispatch) => {
-    console.log(deviceId)
-    const response = await myUrl.get(`/events/${deviceId}`);
-    console.log(response)
+    //console.log(deviceId)
+    const response = await myUrl.get(`/events?device_id=${deviceId}`);
+    //console.log(response)
     dispatch({type: FETCH_EVENTS, payload: response.data})
 };
 

@@ -7,7 +7,7 @@ class ProtectedRoute extends React.Component {
     render() {
         const Component = this.props.component;
         const isAuthenticated = this.props.isSignedIn
-        console.log(isAuthenticated)
+        // console.log(isAuthenticated)
         return isAuthenticated ? (
             <Component />
         ) : (

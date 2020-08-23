@@ -3,7 +3,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
+
 import DeviceTable from './DeviceTable'
+import ConsumptionDeviceMonth from './charts/ConsumptionDeviceMonth'
+import MapContainer2 from './MapContainer2'
+
+import './devicePage.css'
 
 class DeviceList extends React.Component {
 
@@ -31,7 +36,7 @@ class DeviceList extends React.Component {
 
     renderList(){
         if(this.props.isSignedIn) {
-            console.log(this.props.currentUserId)
+            // console.log(this.props.currentUserId)
             //this.props.fetchDevices(this.props.currentUserId);
             return (
                <DeviceTable userId={this.props.currentUserId}/>
@@ -59,7 +64,11 @@ class DeviceList extends React.Component {
             <div className="ui container">
                 {this.renderList()}
                 <br/>
+                <ConsumptionDeviceMonth/>
+                <br/>
                 {this.renderCreate()}
+                <br/>
+                <MapContainer2/>
             </div>
         );
     }

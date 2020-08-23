@@ -10,7 +10,7 @@ import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
 class Header extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
-        console.log(prevProps)
+        // console.log(prevProps)
         if(prevProps.isSignedIn !== this.props.isSignedIn) {
             this.props.fetchNotifications();
         }  
@@ -64,19 +64,29 @@ class Header extends React.Component {
                         Dashboard
                     </Link>
                     <Link to="/bill/show" className="item">
-                        Pay Bills
+                        My Bills
                     </Link>
                 </div>
             );
         }
     }
 
+    showUser(){
+        {/* if(this.props.user != null && this.props.user.le != null){
+            console.log(this.props.user)
+            return <div style={{color: 'white'}}>Hello,</div>
+        }
+        else return <div>Hello, user</div> */}
+    }
+
     render() {
+        //console.log(this.state.auth.user.tt.Ad)
         return (
         <div className="ui massive inverted menu">
             <Link to="/" className="header item">
                 Waterly
             </Link>
+            {this.showUser()}
             <div className="right menu">
                 {this.showIfSignin()}
                 <div className="item">
@@ -92,6 +102,7 @@ const mapStateToProps = (state) => {
     return {
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn,
+        user: state.auth.user,
         notifications: Object.values(state.notifications).filter(o => o.status === true)
     }
 }

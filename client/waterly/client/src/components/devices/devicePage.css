@@ -1,0 +1,12 @@
+.classA{
+    width:50%;
+    margin-right:1%;
+    float: left;
+}
+.classB {
+    width:49%;
+    float: left;
+}
+.clearfix{
+    clear:both
+}

@@ -51,31 +51,31 @@ const useStyles = makeStyles((theme) => ({
     }
   }));
 
-const EventTable = ({deviceId}) => {
+const EventTable = ({data, deviceId}) => {
     const classes = useStyles();
-  var columns = [
-    {title: "Meter reading", field: "water_read"},
-    {title: "Reading time", field: "timestamp", render: rowData => renderTime(rowData.timestamp)},
-    {title: "PH", field: "ph"},
-    {title: "Pressure [atm]", field: "pressure"},
-  ]
-  const [data, setData] = useState([]); //table data
-  const [selectedRow, setSelectedRow] = useState(null);
+    var columns = [
+      {title: "Meter reading", field: "water_read"},
+      {title: "Reading time", field: "timestamp", render: rowData => renderTime(rowData.timestamp)},
+      {title: "PH", field: "ph"},
+      {title: "Pressure [atm]", field: "pressure"},
+    ]
+    // const [data, setData] = useState([]); //table data
+    const [selectedRow, setSelectedRow] = useState(null);
 
-  //for error handling
-  const [iserror] = useState(false)
-  const [errorMessages] = useState([])
+    //for error handling
+    const [iserror] = useState(false)
+    const [errorMessages] = useState([])
 
-  useEffect(() => { 
-    api.get(`/events?device_id=${deviceId}`)
-        .then(res => {            
-            console.log(res)   
-            setData(res.data)
-         })
-         .catch(error=>{
-             console.log("Error")
-         })
-  }, [])
+  // useEffect(() => { 
+  //   api.get(`/events?device_id=${deviceId}`)
+  //       .then(res => {            
+  //           console.log(res)   
+  //           setData(res.data)
+  //        })
+  //        .catch(error=>{
+  //            console.log("Error")
+  //        })
+  // }, [])
 
   return (
     <div className={classes.root}>

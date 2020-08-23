@@ -5,13 +5,13 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Paper from '@material-ui/core/Paper';
 import {
     Chart,
-    ArgumentAxis,
-    ValueAxis,
-    BarSeries,
     Title,
+    CommonSeriesSettings,
+    Series,
     Legend,
-  } from '@devexpress/dx-react-chart-material-ui';
-import { Stack, Animation } from '@devexpress/dx-react-chart';
+    Font,
+    Size
+  } from 'devextreme-react/chart';
 
 import { withStyles } from '@material-ui/core/styles';
 
@@ -63,6 +63,12 @@ class BillShow extends React.Component {
                     <button className="ui primary button" onClick={()=>this.toggle(bill)}>Pay</button>
                 </div>
             );
+        } else{
+            return(
+                <div className="extra content">
+                    <button className="ui disabled button">Paid</button>
+                </div>
+            )
         }
     }
 
@@ -75,55 +81,47 @@ class BillShow extends React.Component {
     }
 
     renderCards(){
-        console.log(this.props.bills)
+        //console.log(this.props.bills)
         return this.props.bills.map(bill => {
-            return (      
-                <div className="ui card" key={bill.id} style={{padding: "20px", margin:"20px"}}>
+            return (     
+                <div className="ui card" key={bill.id} style={{padding: "10px", margin:"10px"}}>
                     <div className="content">
                         <div className="header">Month {bill.time.month}/{bill.time.year}</div>
-                    </div>
-                    <div className="content">
-                        <h4 className="ui sub header">{bill.money.total_price} ILS</h4>
-                        <div className="ui small feed">
-                            <div className="event">
-                                <div className="content">
-                                <div className="summary">
-                                    Total flow for this week is: <a>{bill.total_flow} m³/h</a>
-                                </div>
-                                </div>
-                            </div>
-                            <div className="event">
-                                <div className="content">
-                                <div className="summary">
-                                    Water expenses: <a>{bill.money.water_expenses} ILS</a>
-                                    <br/>
-                                    Fixed expenses: <a>{bill.money.fixed_expenses} ILS</a>
-                                    <br/>
-                                    <b>Total price: {bill.money.water_expenses+bill.money.fixed_expenses} ILS</b>
-                                </div>
-                                </div>
-                            </div>
-                            <div className="event">
-                                <div className="content">
-                                <div className="summary">
-                                    <Paper>
-                                        <Chart data={[{month:`${bill.time.month}`,
-                                         user: bill.money.water_expenses+bill.money.fixed_expenses ,
-                                         avg: bill.avg}]}>
-                                            <ArgumentAxis/>
-                                            <ValueAxis/>
-                                            <BarSeries name="User" valueField="user" argumentField="month" color="#ffd700"/>
-                                            <BarSeries name="Avg" valueField="avg" argumentField="month" color="#c0c0c0"/>
-                                            <Animation />
-                                            <Legend position="bottom" rootComponent={Root} labelComponent={Label} />
-                                            <Title text="Monthly Usage Of Water (m³/h)" />
-                                            <Stack />
-                                        </Chart>
-                                    </Paper>
-                                </div>
-                                </div>
-                            </div>
+                        <div className="meta">
+                            Total flow for this month is: {bill.total_flow} m³/s
+                            <br/>
+                            Water expenses: {bill.money.water_expenses} ILS
+                            <br/>
+                            Fixed expenses: {bill.money.fixed_expenses} ILS
                         </div>
+                        <div className="description">
+                            Total price: {bill.money.water_expenses+bill.money.fixed_expenses} ILS
+                        </div>      
+                    </div>
+                    <div className="summary">
+                        <Chart id="chart" dataSource={[
+                        {
+                            name: "",
+                            user: bill.money.water_expenses+bill.money.fixed_expenses,
+                            avg: bill.avg
+                        }
+                        ]}>
+                        <Size
+                            height={300}
+                            width={250}
+                        />
+                        <Title text="Consumption per device [m³/s]">
+                            <Font size="14"/>
+                        </Title>
+                        <CommonSeriesSettings
+                            argumentField="name"
+                            type="bar"
+                            ignoreEmptyPoints={true}
+                            />
+                            <Series valueField="user" name="user"/>
+                            <Series valueField="avg" name="avg"/>
+                            <Legend verticalAlignment="bottom" horizontalAlignment="center" />
+                        </Chart>
                     </div>
                     {this.showPayButton(bill)}
                 </div>

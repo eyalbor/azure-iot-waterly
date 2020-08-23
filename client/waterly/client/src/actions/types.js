@@ -1,5 +1,6 @@
 export const SIGN_IN = 'SIGN_IN';
 export const SIGN_OUT = 'SIGN_OUT';
+export const SET_USER = 'SET_USER';
 
 export const CREATE_DEVICE = 'CREATE_DEVICE';
 export const FETCH_DEVICE = 'FETCH_DEVICE';
