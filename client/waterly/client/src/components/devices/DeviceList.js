@@ -64,9 +64,9 @@ class DeviceList extends React.Component {
             <div className="ui container">
                 {this.renderList()}
                 <br/>
-                <ConsumptionDeviceMonth/>
-                <br/>
                 {this.renderCreate()}
+                <br/>
+                <ConsumptionDeviceMonth/>
                 <br/>
                 <MapContainer2/>
             </div>

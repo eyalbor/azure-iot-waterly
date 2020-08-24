@@ -38,6 +38,9 @@ export const setUser = (user) =>  (dispatch) => {
     dispatch({type: SET_USER, payload: user})
 }
 
+export const consumptionForYearEachMonth = (year) => {
+    return myUrl.get('/consumption_per_mounth');
+}
 
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;

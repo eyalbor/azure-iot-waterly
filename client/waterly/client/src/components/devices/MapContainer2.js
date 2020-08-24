@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { fetchDevices } from '../../actions'
 
 import { Map, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+import MarkerClusterGroup from "react-leaflet-markercluster";
 
 const position = { lng: 34.798248, lat: 32.115221 };
 
@@ -40,7 +41,9 @@ export class MapContainer2 extends Component {
                         url='http://{s}.tile.osm.org/{z}/{x}/{y}.png'
                         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    {this.displayMarkers()}
+                    <MarkerClusterGroup>
+                        {this.displayMarkers()}
+                    </MarkerClusterGroup>
                 </Map>
             </div>
 

@@ -1,128 +1,129 @@
 import * as React from 'react';
 import Paper from '@material-ui/core/Paper';
-import {
-  Chart,
-  BarSeries,
-  LineSeries,
-  ArgumentAxis,
+import Chart, {
+  CommonSeriesSettings,
+  Series,
   ValueAxis,
-  Title,
+  Export,
   Legend,
-} from '@devexpress/dx-react-chart-material-ui';
+  Tooltip,
+  Title,
+  Grid,
+  Format
+} from 'devextreme-react/chart';
+import _ from 'lodash'
 
-import { ValueScale, Stack } from '@devexpress/dx-react-chart';
+import { consumptionForYearEachMonth } from '../../../actions/index'
 
-export const oilProduction = [
-    {
-      year: '1970', saudiArabia: 241.142, usa: 482.150, iran: 230.174, mexico: 23.640, price: 17, consumption: 570,
-    }, {
-      year: '1980', saudiArabia: 511.334, usa: 437.343, iran: 75.097, mexico: 108.249, price: 104, consumption: 630,
-    }, {
-      year: '1990', saudiArabia: 324.359, usa: 374.867, iran: 165.284, mexico: 141.060, russia: 516.040, price: 23.7, consumption: 590,
-    }, {
-      year: '2000', saudiArabia: 410.060, usa: 297.513, iran: 196.877, mexico: 159.630, russia: 312.821, price: 28.3, consumption: 680,
-    }, {
-      year: '2010', saudiArabia: 413.505, usa: 279.225, iran: 200.318, mexico: 144.975, russia: 487.106, price: 79.6, consumption: 640,
-    }, {
-      year: '2015', saudiArabia: 516.157, usa: 437.966, iran: 142.087, mexico: 121.587, russia: 512.777, price: 52.4, consumption: 790,
-    },
-  ];
-
-const Label = symbol => (props) => {
-  const { text } = props;
-  return (
-    <ValueAxis.Label
-      {...props}
-      text={text + symbol}
-    />
-  );
-};
-
-const PriceLabel = Label(' $');
-const LabelWithThousand = Label(' k');
-
-const modifyOilDomain = domain => [domain[0], 2200];
-const modifyPriceDomain = () => [0, 110];
+// export const devicesSources = [
+//   { value: 'WaterlyIotDevice1', name: 'WaterlyIotDevice2' },
+//   { value: 'WaterlyIotDevice2', name: 'WaterlyIotDevice2' },
+//   { value: 'WaterlyIotDevice3', name: 'WaterlyIotDevice3' },
+//   { value: 'WaterlyIotDevice4', name: 'WaterlyIotDevice4' },
+//   { value: 'WaterlyIotDevice5', name: 'WaterlyIotDevice5' },
+//   { value: 'WaterlyIotDevice6', name: 'WaterlyIotDevice6' },
+//   { value: 'WaterlyIotDevice7', name: 'WaterlyIotDevice7' },
+// ];
 
 export default class ConsumptionDeviceMonth extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.state = {data: null, devices: null}
+  }
 
-    this.state = {
-      oilProduction,
-    };
+  prepareDataForChart(data){
+    this.setState({data})
+    console.log(data)
+    const devicesSources = new Set();
+    const copyData = JSON.parse(JSON.stringify(data))
+    copyData.map(obj => {
+      delete obj.month;
+      delete obj.average;
+      let tuple = JSON.stringify(obj).split(',')
+      tuple.map(obj2 => {
+        //console.log(obj2)
+        let array_tuple = (obj2).split(':')
+        console.log(array_tuple[0].replace('{',''))
+        devicesSources.add(JSON.parse(array_tuple[0].replace('{','')))
+      })
+      //let arr_tuple = JSON.stringify(tuple).split(':')
+      //console.log(JSON.stringify(arr_tuple[0]))
+    })
+      //devicesSources.add({value: , name:})
+      console.log(devicesSources)
+      this.setState({devices: Array.from(devicesSources)})
+
+  }
+
+  componentDidMount(){
+    consumptionForYearEachMonth(2020)
+    .then(res=>{
+      //console.log(res.data)
+      this.prepareDataForChart(res.data)
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 
   render() {
-    const { oilProduction: chartData } = this.state;
-
-    return (
-      <Paper>
+    if(this.state.devices != null){
+      console.log(this.state)
+      return (
+        <Paper>
         <Chart
-          data={chartData}
+          id="chartConsumption"
+          palette="Soft"
+          dataSource={this.state.data}
+          ignoreEmptyPoints={true}
         >
-          <ValueScale name="oil" modifyDomain={modifyOilDomain} />
-          <ValueScale name="price" modifyDomain={modifyPriceDomain} />
-
-          <ArgumentAxis />
-          <ValueAxis
-            scaleName="oil"
-            labelComponent={LabelWithThousand}
+          <CommonSeriesSettings
+            argumentField="month"
+            type="stackedBar"
           />
+          {
+            this.state.devices.map(function(item) {
+              return <Series key={item} valueField={item} name={item} />;
+            })
+          }
+          <Series
+            axis="average"
+            type="spline"
+            valueField="average"
+            name="Average"
+            color="#008fd8"
+          />
+  
+          <ValueAxis>
+            
+          </ValueAxis>
           <ValueAxis
-            scaleName="price"
+            name="average"
             position="right"
-            labelComponent={PriceLabel}
+            title="Average Consumption, m^3/s"
+          >
+          <Grid visible={true} />
+          </ValueAxis>
+          <Legend
+            verticalAlignment="bottom"
+            horizontalAlignment="center"
           />
-
-          <Title
-            text="Oil production vs Oil price"
+          <Export enabled={true} />
+          <Format
+            type="largeNumber"
+            precision={1}
           />
-
-          <BarSeries
-            name="USA"
-            valueField="usa"
-            argumentField="year"
-            scaleName="oil"
+          <Tooltip
+            enabled={true}
+            location="edge"
           />
-          <BarSeries
-            name="Saudi Arabia"
-            valueField="saudiArabia"
-            argumentField="year"
-            scaleName="oil"
-          />
-          <BarSeries
-            name="Iran"
-            valueField="iran"
-            argumentField="year"
-            scaleName="oil"
-          />
-          <BarSeries
-            name="Mexico"
-            valueField="mexico"
-            argumentField="year"
-            scaleName="oil"
-          />
-          <BarSeries
-            name="Russia"
-            valueField="russia"
-            argumentField="year"
-            scaleName="oil"
-          />
-          <LineSeries
-            name="Oil Price"
-            valueField="price"
-            argumentField="year"
-            scaleName="price"
-          />
-          <Stack
-            stacks={[
-              { series: ['USA', 'Saudi Arabia', 'Iran', 'Mexico', 'Russia'] },
-            ]}
-          />
-          <Legend />
+          <Title text="My Consumption Of Water" />
         </Chart>
-      </Paper>
-    );
+        </Paper>
+      );
+    }
+    else {
+      return <div>Loading...</div>
+    }
   }
 }

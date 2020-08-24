@@ -9,46 +9,40 @@
   ],
   "consumption_per_mounth": [
     {
-      "userId": "100034411967853931768",
       "month": 1,
-      "year": 2020,
-      "total_flow": 100
+      "average": 50,
+      "WaterlyIotDevice2": 200,
+      "WaterlyIotDevice3": 50,
+      "WaterlyIotDevice4": 70
     },
     {
-      "userId": "100034411967853931768",
       "month": 2,
-      "year": 2020,
-      "total_flow": 70
+      "average": 55,
+      "WaterlyIotDevice2": 110,
+      "WaterlyIotDevice3": 20,
+      "WaterlyIotDevice4": 30
     },
-    {   
-      "userId": "100034411967853931768",
+    {
       "month": 3,
-      "year": 2020,
-      "total_flow": 33
+      "average": 100,
+      "WaterlyIotDevice2": 50,
+      "WaterlyIotDevice3": 20,
+      "WaterlyIotDevice4": 30
     },
     {
-      "userId": "100034411967853931768",
-      "month": 4,
-      "year": 2020,
-      "total_flow": 90
-    }
-  ],
-  "consumption_per_device": [
-    {
-      "device_id": "WaterlyIotDevice2",
-      "total_flow": 100
+      "month": 6,
+      "average": 100,
+      "WaterlyIotDevice2": 50,
+      "WaterlyIotDevice3": 20,
+      "WaterlyIotDevice4": 30
     },
     {
-      "device_id": "WaterlyIotDevice1",
-      "total_flow": 36
-    },
-    {
-      "device_id": "WaterlyIotDevice3",
-      "total_flow": 30
-    },
-    {
-      "device_id": "WaterlyIotDevice4",
-      "total_flow": 90
+      "month": 7,
+      "average": 100,
+      "WaterlyIotDevice1": 50,
+      "WaterlyIotDevice3": 20,
+      "WaterlyIotDevice4": 30,
+      "WaterlyIotDevice5": 30
     }
   ],
   "bills": [
@@ -170,22 +164,6 @@
       "last_water_read": 100,
       "last_update_timestamp": 1591621266,
       "id": "f78480d6-b000-4571-a98d-6377b9ff3f11"
-    },
-    {
-      "device_id": "WaterlyIotDevice5",
-      "userId": "100034411967853931768",
-      "name": "garden",
-      "address": {
-        "city": "Tel Aviv",
-        "street": "HaBashan",
-        "building_num": 7,
-        "apt_num": 8
-      },
-      "lan": 32.115221,
-      "lng": 34.798248,
-      "last_water_read": 150,
-      "last_update_timestamp": 1591621966,
-      "id": "f78480d6-b000-4571-a98d-6387b9ff3f11"
     },
     {
       "device_id": "WaterlyIotDevice6",

@@ -22,7 +22,7 @@ const ScatterEvents= ({data}) => {
     })
 
     function customizeTooltip(pointInfo) {
-      console.log(pointInfo.point)
+      //console.log(pointInfo.point)
       let text1 = `[${pointInfo.argument.toFixed(1)}, ${pointInfo.originalValue.toFixed(1)}]`
       let text2 =""
       if(pointInfo.point.aggregationInfo != null){
