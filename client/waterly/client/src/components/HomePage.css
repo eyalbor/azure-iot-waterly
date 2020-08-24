@@ -1,6 +1,6 @@
 
   .masthead.segment {
-    min-height: 600px;
+    min-height: 500px;
     padding: 1em 0em;
   }
   .masthead .logo.item img {
@@ -10,8 +10,8 @@
     margin-left: 0.5em;
   }
   .masthead h1.ui.header {
-    margin-top: 3em;
-    margin-bottom: 0em;
+    margin-top: 1em;
+    margin-bottom: 1em;
     font-size: 4em;
     font-weight: normal;
   }
