@@ -51,6 +51,7 @@ namespace Waterly_iot_functions
 
             //now updates the devices table (the last water read)
             float last_water_read = dataJson.water_read;
+            long last_update_timestamp = dataJson.timestamp;
             string device_id = dataJson.device_id;
 
             log.LogInformation("C# event hub trigger function update rows last_water_read.");
@@ -66,6 +67,7 @@ namespace Waterly_iot_functions
                 .First();
 
             deviceItem.last_water_read = last_water_read;
+            deviceItem.last_update_timestamp = last_update_timestamp;
 
             ResourceResponse<Document> response = await docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", deviceItem.id),
