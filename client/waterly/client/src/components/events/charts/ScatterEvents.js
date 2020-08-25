@@ -9,7 +9,9 @@ import {
   CommonSeriesSettings,
   Legend,
   Aggregation,
-  Tooltip
+  Tooltip,
+  ConstantLine,
+  Label
 } from 'devextreme-react/chart';
 
 const ScatterEvents= ({data}) => {
@@ -36,8 +38,47 @@ const ScatterEvents= ({data}) => {
         <Chart id="scatterChart" dataSource={dataGen}>
           <CommonSeriesSettings type="scatter" />
           <Title text="Ph vs Pressure" />
-          <ArgumentAxis title="ph" tickInterval={1} visualRange={[0,14]}/>
-          <ValueAxis title="pressure [atm]" tickInterval={1} visualRange={[0,5]} />
+          <ArgumentAxis title="ph" tickInterval={1} visualRange={[0,14]}>
+          <ConstantLine
+            value={6.9}
+            width={2}
+            color="#fc3535"
+            dashStyle="dash"
+          >
+            <Label visible={false} />
+          </ConstantLine>
+
+          <ConstantLine
+            value={7.1}
+            width={2}
+            color="#fc3535"
+            dashStyle="dash"
+          >
+            <Label visible={false} />
+          </ConstantLine>
+
+            </ArgumentAxis>
+          <ValueAxis title="pressure [atm]" tickInterval={1} visualRange={[0,5]}>
+
+          <ConstantLine
+            value={1.2}
+            width={2}
+            color="#fc3535"
+            dashStyle="dash"
+          >
+            <Label visible={false} />
+          </ConstantLine>
+
+          <ConstantLine
+            value={2.5}
+            width={2}
+            color="#fc3535"
+            dashStyle="dash"
+          >
+            <Label visible={false} />
+          </ConstantLine>
+
+          </ValueAxis>
             <Series
               valueField="val1"
               argumentField="arg1"

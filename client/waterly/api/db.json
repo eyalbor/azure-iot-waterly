@@ -85,10 +85,7 @@
       "type": "leakage",
       "message": "big problem",
       "device_id": "WaterlyIotDevice1",
-      "status": true,
-      "tableData": {
-        "id": 0
-      }
+      "status": true
     },
     {
       "id": 2,
@@ -97,14 +94,14 @@
       "type": "ph",
       "message": "water",
       "device_id": "WaterlyIotDevice1",
-      "status": false
+      "status": true
     }
   ],
   "devices": [
     {
       "device_id": "WaterlyIotDevice1",
       "userId": "100034411967853931768",
-      "name": "kitchen fre",
+      "name": "kitchen grill",
       "address": {
         "city": "Tel Aviv",
         "street": "HaBashan",

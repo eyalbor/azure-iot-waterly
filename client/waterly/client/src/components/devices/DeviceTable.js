@@ -51,12 +51,12 @@ const tableIcons = {
 };
 
 const DeviceTable = ({userId}) => {
-    var columns = [
-        {title: "Device id", field: "device_id"},
-        {title: "Name", field: "name"},
-        {title: "Meter Reading [m^3/s]", field: "last_water_read"},
-        {title: "Last Update", field: "last_update_timestamp", render: rowData => renderTime(rowData.last_update_timestamp)}
-    ]
+    const [columns, setColumns] = useState([
+        {title: "Device id", field: "device_id", editable: 'never'},
+        {title: "Name", field: "name", editable: 'onUpdate'},
+        {title: "Meter Reading [m^3/s]", field: "last_water_read", editable: 'never'},
+        {title: "Last Update", field: "last_update_timestamp", editable: 'never', render: rowData => renderTime(rowData.last_update_timestamp)}
+    ])
     const [data, setData] = useState([]); //table data
     const [selectedRow, setSelectedRow] = useState(null);
 
@@ -162,10 +162,14 @@ const DeviceTable = ({userId}) => {
                         })
                     }}
                     editable={{
+                        onRowUpdate: (newData, oldData) =>
+                            new Promise((resolve) => {
+                            handleRowUpdate(newData, oldData, resolve);
+                        }),
                         onRowDelete: (oldData) =>
                         new Promise((resolve) => {
                             handleRowDelete(oldData, resolve)
-                        }),
+                        })
                     }}
                     actions={[
                         rowData => ({
@@ -177,11 +181,7 @@ const DeviceTable = ({userId}) => {
                         rowData =>({
                             icon: () => <Link style={{ color: '#000' }} to={`/events/device/${rowData.device_id}`}><EventIcon/></Link>,
                             tooltip: "Device Events",
-                        }),
-                        rowData => ({
-                            icon: () => <Link style={{ color: '#000' }} to={`/devices/edit/${rowData.device_id}`}><Edit/></Link>,
-                            tooltip: "Edit Device",  
-                        }),
+                        })
                     ]}
                 />
             </Grid>

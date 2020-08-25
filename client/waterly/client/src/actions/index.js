@@ -27,7 +27,7 @@ export const signIn = (userId) =>{
     }
 }; 
 
-export const signOut = ()=>{
+export const signOut = () => {
     return {
         type: SIGN_OUT
     }
