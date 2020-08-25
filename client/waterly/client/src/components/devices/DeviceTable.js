@@ -77,12 +77,12 @@ const DeviceTable = ({userId}) => {
     const handleRowUpdate = (newData, oldData, resolve) => {
         //validation
         let errorList = []
-        if(newData.first_name === ""){
-            errorList.push("Please enter first name")
-        }
-        if(newData.last_name === ""){
-            errorList.push("Please enter last name")
-        }
+        // if(newData.first_name === ""){
+        //     errorList.push("Please enter first name")
+        // }
+        // if(newData.last_name === ""){
+        //     errorList.push("Please enter last name")
+        // }
 
         if(errorList.length < 1){
             api.patch("/devices/"+newData.id, newData)
