@@ -9,13 +9,16 @@ import time
 import json
 import uuid
 from azure.iot.device import IoTHubDeviceClient, Message
+import numpy as np
 
 # Define the JSON message to send to IoT Hub.
 
 MSG_TXT = '{{"id": "{uuid}",'\
           '"device_id": "{device_id}",' \
           '"timestamp": {timestamp},' \
-          '"water_read": {water_read}}}'
+          '"water_read": {water_read},' \
+          '"ph": {ph},' \
+          '"water_pressure": {water_pressure}}}'
 
 
 def iothub_client_init(device_connection_string):
@@ -54,10 +57,14 @@ def iothub_client_telemetry_sample_run(device_connection_string, device_id):
             # Build the message with simulated telemetry values.
             current_read_timestamp = time.time()
             current_water_read = last_water_read + (current_read_timestamp-last_read_timestamp) * 10 * random.random()
+            ph = np.random.normal(7, 0.4, 1)[0]
+            water_pressure = np.random.normal(4, 0.5, 1)[0]
             msg_txt_formatted = MSG_TXT.format(uuid=uuid.uuid1(),
                                                device_id=device_id,
                                                timestamp=int(current_read_timestamp),
-                                               water_read=int(current_water_read))
+                                               water_read=int(current_water_read),
+                                               ph=ph,
+                                               water_pressure=water_pressure)
             message = Message(msg_txt_formatted)
 
             # Add a custom application property to the message.
@@ -65,15 +72,14 @@ def iothub_client_telemetry_sample_run(device_connection_string, device_id):
 
             # Send the message.
             print("Sending message: {}".format(message))
+            update_device_memory(json.loads(msg_txt_formatted), device_last_update_file_name)
             client.send_message(message)
             print("Message successfully sent")
-
-            update_device_memory(json.loads(msg_txt_formatted), device_last_update_file_name)
 
             last_read_timestamp = current_read_timestamp
             last_water_read = current_water_read
 
-            time.sleep(30)
+            time.sleep(60)
 
     except KeyboardInterrupt:
         print("IoTHubClient sample stopped")
