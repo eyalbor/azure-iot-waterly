@@ -33,8 +33,8 @@ const mapStateToProps = (state, ownProps) => {
     //Object.values gets all the object inside and make it as array
     return {
         device: state.devices[ownProps.match.params.id],
-        // currentUserId: state.auth.userId,
-        // isSignedIn: state.auth.isSignedIn
+        currentUserId: state.auth.userId,
+        isSignedIn: state.auth.isSignedIn
     }
 }
 

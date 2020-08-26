@@ -30,9 +30,7 @@ namespace Waterly_iot_functions
         static DocumentClient docClient = new DocumentClient(new Uri("https://waterly-iot.documents.azure.com:443/"), "cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==");
         
         [FunctionName("InsertEvent")]
-        public static async Task Run([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData,
-
-    ILogger log)
+        public static async Task Run([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
         {
 
             log.LogInformation("C# event hub trigger function processed events.");
@@ -53,6 +51,7 @@ namespace Waterly_iot_functions
 
             //now updates the devices table (the last water read)
             float last_water_read = dataJson.water_read;
+            long last_update_timestamp = dataJson.timestamp;
             string device_id = dataJson.device_id;
 
             log.LogInformation("C# event hub trigger function update rows last_water_read.");
@@ -68,6 +67,7 @@ namespace Waterly_iot_functions
                 .First();
 
             deviceItem.last_water_read = last_water_read;
+            deviceItem.last_update_timestamp = last_update_timestamp;
 
             ResourceResponse<Document> response = await docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", deviceItem.id),
@@ -130,9 +130,6 @@ namespace Waterly_iot_functions
         }
 
     }
-
-
-
     
 }
 

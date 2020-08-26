@@ -12,11 +12,12 @@ export default (state = {}, action ) => {
         case FETCH_DEVICES:
             return {...state, ..._.mapKeys(action.payload, 'device_id')};
         case FETCH_DEVICE:
-            return {...state, [action.payload.id]: action.payload};
+            console.log("reducer: " + action.payload)
+            return {...state, [action.payload.device_id]: action.payload};
         case CREATE_DEVICE:
-            return {...state, [action.payload.id]: action.payload};
+            return {...state, [action.payload.device_id]: action.payload};
         case EDIT_DEVICE:
-            return {...state, [action.payload.id]: action.payload};
+            return {...state, [action.payload.device_id]: action.payload};
         case DELETE_DEVICE:
             return _.omit(state, action.payload);
         default:

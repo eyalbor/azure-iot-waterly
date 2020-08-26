@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/fa24cc2e-d7b3-4a24-96ae-ec3f724272fb/resourceGroups/WaterlyIoTProjectResourceGroup/providers/Microsoft.Web/sites/waterly",
+    "appService.deploySubpath": "."
+}
