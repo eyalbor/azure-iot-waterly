@@ -66,7 +66,7 @@ namespace Waterly_iot_functions
 
     public class BillItem
     {
-        public int id { get; set; }
+        public string bill_id { get; set; }
 
         public string device_id { get; set; }
 
@@ -84,9 +84,9 @@ namespace Waterly_iot_functions
         public float avg { get; set; }
     }
 
-    public class NotificationItem
+    public class AlertItem
     {
-        public int id { get; set; }
+        public string alert_id { get; set; }
 
         public string device_id { get; set; }
 
@@ -100,7 +100,7 @@ namespace Waterly_iot_functions
 
         public bool status { get; set; }
 
-
+        public bool feedback { get; set; }
     }
 
 }
