@@ -184,7 +184,7 @@ namespace Waterly_iot_functions
             AlertItem alert = new AlertItem
             {
                 device_id = eventItem.device_id,
-                timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                created_at = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
                 type = type,
                 user_id = userId,
                 status = false,
@@ -195,7 +195,7 @@ namespace Waterly_iot_functions
             ItemResponse<AlertItem> alertResponse = await alert_container.CreateItemAsync<AlertItem>(alert, new PartitionKey(alert.device_id));
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
-            Console.WriteLine("Created item in database with id: {0}\n", alertResponse.Resource.id);
+            Console.WriteLine("Created item in database with id: {0}\n", alertResponse.Resource.alert_id);
         }
     }
 }
