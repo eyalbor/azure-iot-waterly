@@ -9,10 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs;
-using Microsoft.Extensions.Logging;
-using Bugsnag.Payload;
-using Exception = System.Exception;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,20 +21,17 @@ namespace Waterly_iot_functions
 {
     public static class InsertEvent
     {
-        static CosmosClient cosmosClient = new CosmosClient("AccountEndpoint=https://waterly-iot.documents.azure.com:443/;AccountKey=cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==;");
+        public static CosmosClient cosmosClient = new CosmosClient("AccountEndpoint=https://waterly-iot.documents.azure.com:443/;AccountKey=cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==;");
 
-        static DocumentClient docClient = new DocumentClient(new Uri("https://waterly-iot.documents.azure.com:443/"), "cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==");
+        public static DocumentClient docClient = new DocumentClient(new Uri("https://waterly-iot.documents.azure.com:443/"), "cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==");
         
-        static Container events_container = cosmosClient.GetContainer("waterly_db", "water_table");
-
-
         [FunctionName("InsertEvent")]
         public static async Task Run([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
         {
 
             log.LogInformation("C# event hub trigger function processed events.");
 
-           
+            Container events_container = cosmosClient.GetContainer("waterly_db", "water_table");
 
 
             string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
@@ -68,7 +61,7 @@ namespace Waterly_iot_functions
                 .Where(deviceItem => deviceItem.device_id.Equals(device_id))
                 .AsEnumerable()
                 .First();
-
+            
             deviceItem.last_water_read = last_water_read;
             deviceItem.last_update_timestamp = last_update_timestamp;
 
@@ -77,6 +70,8 @@ namespace Waterly_iot_functions
                 deviceItem);
 
             var updated = response.Resource;
+
+            Detector.detectionPipeline(dataJson, deviceItem.userId);
 
         }
 
