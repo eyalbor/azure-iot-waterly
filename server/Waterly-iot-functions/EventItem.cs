@@ -58,7 +58,7 @@ namespace Waterly_iot_functions
     public class UserItem
     {
 
-        public int id { get; set; }
+        public string id { get; set; }
         public string full_name { get; set; }
         public long created_at { get; set; }
         public string email { get; set; }
@@ -66,7 +66,7 @@ namespace Waterly_iot_functions
 
     public class BillItem
     {
-        public int id { get; set; }
+        public string id { get; set; }
 
         public string device_id { get; set; }
 
@@ -84,9 +84,9 @@ namespace Waterly_iot_functions
         public float avg { get; set; }
     }
 
-    public class NotificationItem
+    public class AlertItem
     {
-        public int id { get; set; }
+        public string id { get; set; }
 
         public string device_id { get; set; }
 
@@ -94,7 +94,7 @@ namespace Waterly_iot_functions
 
         public string type { get; set; }
 
-        public long created_at { get; set; }
+        public long timestamp { get; set; }
 
         public string message { get; set; }
 
