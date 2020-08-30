@@ -25,13 +25,8 @@ namespace Waterly_iot_functions
     {
         public static CosmosClient cosmosClient = new CosmosClient("AccountEndpoint=https://waterly-iot.documents.azure.com:443/;AccountKey=cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==;");
 
-<<<<<<< HEAD
         public static DocumentClient docClient = new DocumentClient(new Uri("https://waterly-iot.documents.azure.com:443/"), "cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==");
-        
-=======
-        static DocumentClient docClient = new DocumentClient(new Uri("https://waterly-iot.documents.azure.com:443/"), "cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==");
 
->>>>>>> 0fa1ab33146aee5fb2eefc2a00c3262ee10236f3
         [FunctionName("InsertEvent")]
         public static async Task Run([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
         {
@@ -68,7 +63,7 @@ namespace Waterly_iot_functions
                 .Where(deviceItem => deviceItem.device_id.Equals(device_id))
                 .AsEnumerable()
                 .First();
-            
+
             deviceItem.last_water_read = last_water_read;
             deviceItem.last_update_timestamp = last_update_timestamp;
 
@@ -78,7 +73,7 @@ namespace Waterly_iot_functions
 
             var updated = response.Resource;
 
-            Detector.detectionPipeline(dataJson, deviceItem.userId);
+            Detector.detectionPipeline(dataJson, deviceItem.userId, log);
 
         }
 
@@ -219,7 +214,7 @@ namespace Waterly_iot_functions
         {
             Container devices_container = cosmosClient.GetContainer("waterly_db", "waterly_devices");
 
-               
+
             DeviceItem deviceJson = JsonConvert.DeserializeObject<DeviceItem>("check"); //check with eyal's client how it's sent
 
             await devices_container.CreateItemAsync(deviceJson);
@@ -227,7 +222,7 @@ namespace Waterly_iot_functions
 
         [FunctionName("delete_device")]
         public static async Task Run9(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{device_id}")] HttpRequest request, ILogger log) //route?
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{device_id}")] HttpRequest request, ILogger log) //route?
         {
             Container devices_container = cosmosClient.GetContainer("waterly_db", "waterly_devices");
 
@@ -238,7 +233,7 @@ namespace Waterly_iot_functions
 
         [FunctionName("update_alert")]
         public static async void Run10(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notification.id}")] HttpRequest request, 
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notification.id}")] HttpRequest request,
                 ILogger log)
 
         {
@@ -262,8 +257,43 @@ namespace Waterly_iot_functions
 
             var updated = response.Resource;
         }
+
+
+        // Function is called every month on the 10th at 11 AM.
+        [FunctionName("create_bills_for_all_users")]
+        public static async void createBill(
+            [TimerTrigger("0 0 10 10 * *")]TimerInfo myTimer,
+            [CosmosDB(
+                databaseName: "waterly_db",
+                collectionName: "users_table",
+                ConnectionStringSetting = "CosmosDBConnection",
+                SqlQuery = "SELECT * FROM c")]
+            IEnumerable<UserItem> users,
+            ILogger log)
+            
+        {
+            if (myTimer.IsPastDue)
+            {
+                log.LogInformation("Timer is running late!");
+            }
+            log.LogInformation($"C# Timer trigger function executed at: {DateTime.UtcNow}");
+
+            long sumConsumption = 0;
+            Dictionary<UserItem, long> userConsumptionDict = new Dictionary<UserItem, long>();
+            
+            foreach (UserItem user in users)
+            {
+                long userConsumption = await BillGenerator.calculateUserConsumption(user, log, DateTime.Today);
+                userConsumptionDict.Add(user, userConsumption);
+                sumConsumption += userConsumption;
+            }
+            double avgConsumption = sumConsumption / users.Count();
+            foreach (KeyValuePair<UserItem, long> keyValuePair in userConsumptionDict)
+            {
+                BillGenerator.generateNewBill(keyValuePair.Key, keyValuePair.Value, DateTime.Today, avgConsumption);
+            }
+        }
     }
-    
 }
 
 

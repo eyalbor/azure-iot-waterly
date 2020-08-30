@@ -17,8 +17,9 @@ namespace Waterly_iot_functions
         private static ILogger logger;
 
 
-        public static void detectionPipeline(EventItem eventItem, string userId)
+        public static void detectionPipeline(EventItem eventItem, string userId, ILogger log)
         {
+            Detector.logger = log;
             detectPHLevel(eventItem, userId);
             detectPressureLevel(eventItem, userId);
             detectLeakage(eventItem, userId);
@@ -97,8 +98,8 @@ namespace Waterly_iot_functions
 
             double lastDayConsumptionPerHour;
             double lastWeekConsumptionPerHour;
-            float waterRead24HourAgo = 0;
-            float waterRead7DaysAgo = 0;
+            long waterRead24HourAgo = 0;
+            long waterRead7DaysAgo = 0;
             long waterReadTimestamp24HoursAgo = 0;
             long waterReadTimestamp7DaysAgo = 0;
 
@@ -191,7 +192,7 @@ namespace Waterly_iot_functions
                 message = "Contact with technician"
             };
 
-            // Create an item in the container representing the Andersen family. Note we provide the value of the partition key for this item, which is "Andersen"
+            // Create an item in the container representing alert. Note we provide the value of the partition key for this item, which is "Andersen"
             ItemResponse<AlertItem> alertResponse = await alert_container.CreateItemAsync<AlertItem>(alert, new PartitionKey(alert.device_id));
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
