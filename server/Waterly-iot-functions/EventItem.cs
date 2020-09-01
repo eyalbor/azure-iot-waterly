@@ -19,15 +19,12 @@ namespace Waterly_iot_functions
 
         public string device_id { get; set; }
 
-        public float water_read { get; set; }
+        public long water_read { get; set; }
         public long timestamp { get; set; } 
 
         public string id { get; set; }
 
         public float ph { get; set; }
-
-        public float volumeFlowRate { get; set; }
-
         public float pressure { get; set; }
          
     }
@@ -41,7 +38,7 @@ namespace Waterly_iot_functions
         public string name { get; set; }
         public Address address { get; set; }
 
-        public float last_water_read { get; set; }
+        public long last_water_read { get; set; }
 
         public long last_update_timestamp { get; set; }
 
@@ -58,7 +55,7 @@ namespace Waterly_iot_functions
     public class UserItem
     {
 
-        public int id { get; set; }
+        public string id { get; set; }
         public string full_name { get; set; }
         public long created_at { get; set; }
         public string email { get; set; }
@@ -77,11 +74,11 @@ namespace Waterly_iot_functions
         public float water_expenses { get; set; }
 
         public float fixed_expenses { get; set; }
-        public float total_flow { get; set; }
+        public long total_flow { get; set; }
 
         public bool status { get; set; }
 
-        public float avg { get; set; }
+        public double avg { get; set; }
     }
 
     public class AlertItem
@@ -103,6 +100,15 @@ namespace Waterly_iot_functions
         public bool feedback { get; set; }
     }
 
+
+    public class MonthlyDeviceConsumptionItem
+    {
+        public string device_id { get; set; }
+        public int month { get; set; }
+        public int year { get; set; }
+        public long consumption_sum { get; set; }
+        public long last_water_read { get; set; }
+    }
 }
 
 

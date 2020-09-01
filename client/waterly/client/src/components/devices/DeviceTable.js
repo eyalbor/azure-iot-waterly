@@ -65,7 +65,7 @@ const DeviceTable = ({userId}) => {
     const [errorMessages, setErrorMessages] = useState([])
 
     useEffect(() => { 
-        api.get(`/devices?userId=${userId}`)
+        api.get(`/devices/userId=${userId}`)
             .then(res => {             
                 setData(res.data)
             })
