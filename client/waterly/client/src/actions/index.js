@@ -39,12 +39,12 @@ export const setUser = (user) =>  (dispatch) => {
 }
 
 export const consumptionForYearEachMonth = (year) => {
-    return myUrl.get('/consumption_per_mounth');
+    return myUrl.get('/consumption_per_month/userId=${userId}');
 }
 
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
-    const response = await myUrl.get(`/notifications?user_id=${userId}`);
+    const response = await myUrl.get(`/notifications/user_id=${userId}`);
     dispatch({type: FETCH_NOTIFICATIONS, payload: response.data})
 };
 
@@ -65,7 +65,7 @@ export const createDevice = (formValues) => async (dispatch, getState) => {
 export const fetchDevices = () =>  async (dispatch, getState) => {
     const { userId } = getState().auth;
     //return myUrl.get(`/devices/${userId}`);
-    const response = await myUrl.get(`/devices?userId=${userId}`);
+    const response = await myUrl.get(`/devices/userId=${userId}`);
     dispatch({type: FETCH_DEVICES, payload: response.data})
 };
 
@@ -95,7 +95,7 @@ export const fetchEvents = (deviceId) => async (dispatch) => {
 
 export const fetchBills = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
-    const response = await myUrl.get(`/bills`);
+    const response = await myUrl.get(`/bills/userId=${userId}`);
     dispatch({type: FETCH_BILLS, payload: response.data})
 }
 

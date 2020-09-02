@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.Azure.WebJobs.Extensions.CosmosDB;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,18 +13,16 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents;
+using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
-
-
 namespace Waterly_iot_functions
 {
 
     //inserts events from simulation to tables (by trigger)
     public static class Function1
     {
-
-        [FunctionName("InsertEvent")]
+ 	[FunctionName("InsertEvent")]
         public static async Task Run([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
         {
 
@@ -89,6 +89,58 @@ namespace Waterly_iot_functions
             return new OkObjectResult(devicesList);
         }
 
+/*
+
+        [FunctionName("get_devices_by_user_id")]
+        public static async IActionResult Run12(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consumption_per_month/userId={userId}")] HttpRequest request,
+        [CosmosDB(
+                databaseName: "waterly_db",
+                collectionName: "waterly_devices",
+                ConnectionStringSetting = "CosmosDBConnection",
+                SqlQuery = "SELECT * FROM c WHERE c.userId = {userId}")]
+                IEnumerable<DeviceItem> devices,
+                ILogger log)
+
+        {
+            Container BillsContainer = cosmosClient.GetContainer("waterly_db", "bill_table");
+            Container ConsumptionContainer = cosmosClient.GetContainer("waterly_db", "consumption_device_month");
+
+
+            //for all year, dict for month number and dict userConsumptionPerMonthDict
+            Dictionary<int, Dictionary<string, long>> userConsumptionDict = new Dictionary<int, Dictionary<string, long>>();
+
+            for (int month_num = 1; month_num < 13; month_num++)
+            {
+                //for each month, dict for device id and consumption sum
+                Dictionary<string, long> userConsumptionPerMonthDict = new Dictionary<string, long>();
+
+                //Add avg per month
+                QueryDefinition bills_query = new QueryDefinition("SELECT top 1 avg FROM b WHERE b.month = @month_num").WithParameter("@month_num", month_num);
+                FeedIterator<long> bill_iterator = BillsContainer.GetItemQueryIterator<long>(bills_query);
+                long avg = await bill_iterator.ReadNextAsync();
+                userConsumptionPerMonthDict.Add("Average", avg);
+
+                foreach (DeviceItem device_item in devices)
+                {
+                    //calculate sum for month_num for device_item
+                    QueryDefinition consumption_query = new QueryDefinition("SELECT consumption_sum FROM c WHERE c.month = @month_num AND c.year = @year AND c.device_id = @device_id").WithParameter("@month_num", month_num).WithParameter("@year", DateTime.Today.Year).WithParameter("@device_id", device_item.device_id);
+                    FeedIterator<long> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<long>(consumption_query);
+                    long consumption_per_device_month = await bill_iterator.ReadNextAsync();
+
+                    //add to dict
+                    userConsumptionPerMonthDict.Add(device_item.device_id, consumption_per_device_month);
+                }
+
+                userConsumptionDict.Add(month_num, userConsumptionPerMonthDict); 
+            }
+            
+            return new OkObjectResult(userConsumptionDict);
+        }
+
+            */
+
+
 
         [FunctionName("get_events_by_device_id")]
         public static IActionResult Run3(
@@ -147,7 +199,7 @@ namespace Waterly_iot_functions
 
         [FunctionName("get_bills_by_user_id")]
         public static IActionResult Run7(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "bills/{userId}")] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "bills/userId={userId}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "bills_table",
@@ -163,16 +215,16 @@ namespace Waterly_iot_functions
             log.LogInformation("http request for bills of user id");
             foreach (BillItem bill in bills)
             {
-                log.LogInformation($"bill id is : {bill.id}");
+                log.LogInformation($"bill id is : {bill.bill_id}");
                 bills_list.Add(bill);
             }
             return new OkObjectResult(bills_list);
         }
 
         [FunctionName("get_alerts_by_user_id")]
-        public static IActionResult Run8(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "notifications?user_id=${userId}")] HttpRequest request,
-            [CosmosDB(
+        public static IActionResult Run4(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "notifications/user_id={userId}")] HttpRequest request,
+        [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "alerts_table",
                 ConnectionStringSetting = "CosmosDBConnection",
@@ -255,6 +307,7 @@ namespace Waterly_iot_functions
             await devices_container.CreateItemAsync(deviceJson);
         }
 
+        /*
         [FunctionName("delete_device")]
         public static async Task Run9(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{device_id}")] HttpRequest request, ILogger log) //route?
@@ -265,6 +318,7 @@ namespace Waterly_iot_functions
 
             //await devices_container.DeleteItemAsync(device_id); todo:delete
         }
+        */
 
         [FunctionName("update_alert")]
         public static async void Run10(
@@ -305,7 +359,7 @@ namespace Waterly_iot_functions
                 SqlQuery = "SELECT * FROM c")]
             IEnumerable<UserItem> users,
             ILogger log)
-
+            
         {
             if (myTimer.IsPastDue)
             {
@@ -315,7 +369,7 @@ namespace Waterly_iot_functions
 
             long sumConsumption = 0;
             Dictionary<UserItem, long> userConsumptionDict = new Dictionary<UserItem, long>();
-
+            
             foreach (UserItem user in users)
             {
                 long userConsumption = await BillGenerator.calculateUserConsumption(user, log, DateTime.Today);
@@ -328,10 +382,8 @@ namespace Waterly_iot_functions
                 await BillGenerator.generateNewBill(keyValuePair.Key, keyValuePair.Value, DateTime.Today, avgConsumption);
             }
         }
-
     }
 }
-
 
 
 

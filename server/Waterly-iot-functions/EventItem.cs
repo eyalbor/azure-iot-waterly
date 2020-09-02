@@ -25,9 +25,6 @@ namespace Waterly_iot_functions
         public string id { get; set; }
 
         public float ph { get; set; }
-
-        public float volumeFlowRate { get; set; }
-
         public float pressure { get; set; }
          
     }
@@ -39,7 +36,7 @@ namespace Waterly_iot_functions
         public string userId { get; set; }
 
         public string name { get; set; }
-        
+
         public Address address { get; set; }
 
         public long last_water_read { get; set; }
@@ -74,7 +71,7 @@ namespace Waterly_iot_functions
         public float water_expenses { get; set; }
 
         public float fixed_expenses { get; set; }
-        public float total_flow { get; set; }
+        public long total_flow { get; set; }
 
         public bool status { get; set; }
 
