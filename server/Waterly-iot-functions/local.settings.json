@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    //"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=omrimanorstorageaccount;AccountKey=VcmL2FosYGV5K57NyuidV9+DSqXsGA++9vMlj7z9GsYfuu9tvOrvNYvlS+PCwXmEBLqfL0CUfbHlniEfYvgwuA==",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "AzureSignalRConnectionString": "Endpoint=https://iotmysignalr.service.signalr.net;AccessKey=yoTCcVoquUoInYdPG9iKPwLjxxZ9VtFu3RRIinYjHPE=;Version=1.0;",
+    "CosmosDBConnection": "AccountEndpoint=https://waterly-iot.documents.azure.com:443/;AccountKey=cC49BNfE7uQTuEVdSNeJAUZuzTjpzl5j0MLSsb8aHGL6jGh3JmubV2TAbgxW05vYtmMA8LqTitsbRPjUZY8YsA==;",
+    "str": "Endpoint=sb://waterlynamespace.servicebus.windows.net/;SharedAccessKeyName=iothub_Waterly_read;SharedAccessKey=RR6dyWMBmEyYh2x7txwTqvr0xE49lEZxT/3WCjohlDU=;EntityPath=waterlyeventhub"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*"
+  }
+} 

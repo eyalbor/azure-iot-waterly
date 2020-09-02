@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waterly-iot-functions", "Waterly-iot-functions.csproj", "{58ED15C2-0EFF-4C46-8B2C-72A98E54B0F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bill", "..\Bill\Bill.csproj", "{0C0EB7AE-7073-4562-9094-68C711C7B5B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bill", "..\Bill\Bill.csproj", "{0C0EB7AE-7073-4562-9094-68C711C7B5B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,37 +1,46 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
+using Microsoft.Azure.WebJobs;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Waterly_iot_functions
 {
-    class Detector
+    public static class Detector
     {
 
-        public static Container events_container = InsertEvent.cosmosClient.GetContainer("waterly_db", "water_table");
-        public static Container alert_container = InsertEvent.cosmosClient.GetContainer("waterly_db", "alerts_table");
+        public static Container events_container = Function1.cosmosClient.GetContainer("waterly_db", "water_table");
+        public static Container alert_container = Function1.cosmosClient.GetContainer("waterly_db", "alerts_table");
         public static String LEAKAGE = "Leakage";
         public static String ABNORMAL_PH_LEVEL = "Abnormal PH level";
         public static String ABNORMAL_PRESSURE_LEVEL = "Abnormal pressure level";
         private static ILogger logger;
 
-
-        public static void detectionPipeline(EventItem eventItem, string userId, ILogger log)
+        [FunctionName("execute_detection_logic")]
+        public static async Task executeDetectionLogic(EventItem eventItem, String userId, ILogger log)
         {
             Detector.logger = log;
-            detectPHLevel(eventItem, userId);
-            detectPressureLevel(eventItem, userId);
-            detectLeakage(eventItem, userId);
+            logger.LogInformation("Executing detection pipeline...");
+            
+            Task ph = detectPHLevel(eventItem, userId);
+            Task pressure = detectPressureLevel(eventItem, userId);
+            Task leakage = detectLeakage(eventItem, userId);
+
+            await ph;
+            await pressure;
+            await leakage;
         }
 
-        public static async void detectPHLevel(EventItem eventItem, string userId)
+        public static async Task detectPHLevel(EventItem eventItem, string userId)
         {
-            int numOfSamples = 5;
-            var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = {eventItem.device_id}";
             float avgPH = 0;
+            int numOfSamples = 10;
+            var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = '{eventItem.device_id}' " +
+                    "order by c.timestamp DESC";
 
-            logger.LogInformation(sqlQueryText);
+            logger.LogInformation("Observing PH level...");
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<EventItem> queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
@@ -46,25 +55,27 @@ namespace Waterly_iot_functions
             }
 
             avgPH = avgPH / numOfSamples;
+
             if (avgPH != 0)
             {
                 if (avgPH > 5 || avgPH < 3)
                 {
                     //There is abnormal PH level
-                    logger.LogInformation(ABNORMAL_PH_LEVEL + $"PH: {avgPH}");
-                    supressDetection(eventItem, ABNORMAL_PH_LEVEL, userId);
+                    logger.LogInformation(ABNORMAL_PH_LEVEL + $" PH: {avgPH}");
+                    await suppressDetection(eventItem, ABNORMAL_PH_LEVEL, userId);
                 }
             }
         }
 
 
-        public static async void detectPressureLevel(EventItem eventItem, string userId)
+        public static async Task detectPressureLevel(EventItem eventItem, string userId)
         {
-            int numOfSamples = 5;
-            var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = {eventItem.device_id}";
-            float avgPressue = 0;
+            int numOfSamples = 10;
+            var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = '{eventItem.device_id}'" +
+                    "order by c.timestamp DESC";
+            float avgPressure = 0;
 
-            logger.LogInformation(sqlQueryText);
+            logger.LogInformation("Observing pressure level...");
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<EventItem> queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
@@ -74,26 +85,25 @@ namespace Waterly_iot_functions
                 currentResultSet = await queryResultSetIterator.ReadNextAsync();
                 foreach (EventItem item in currentResultSet)
                 {
-                    avgPressue += item.pressure;
+                    avgPressure += item.pressure;
                 }
             }
 
-            avgPressue = avgPressue / numOfSamples;
+            avgPressure = avgPressure / numOfSamples;
 
-            if (avgPressue != 0)
+            if (avgPressure != 0)
             {
-                if (avgPressue > 5 || avgPressue < 3)
+                if (avgPressure > 5 || avgPressure < 3)
                 {
                     //There is a leak abnormal pressure level
-                    logger.LogInformation(ABNORMAL_PRESSURE_LEVEL + $"Pressure: {avgPressue}");
-                    supressDetection(eventItem, ABNORMAL_PRESSURE_LEVEL, userId);
+                    logger.LogInformation(ABNORMAL_PRESSURE_LEVEL + $" Pressure: {avgPressure}");
+                    await suppressDetection(eventItem, ABNORMAL_PRESSURE_LEVEL, userId);
                 }
             }
-
         }
 
 
-        public static async void detectLeakage(EventItem eventItem, string userId)
+        public static async Task detectLeakage(EventItem eventItem, string userId)
         {
 
             double lastDayConsumptionPerHour;
@@ -102,12 +112,13 @@ namespace Waterly_iot_functions
             long waterRead7DaysAgo = 0;
             long waterReadTimestamp24HoursAgo = 0;
             long waterReadTimestamp7DaysAgo = 0;
+            
+            logger.LogInformation("Observing avg water consumption...");
 
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {eventItem.device_id} AND " +
-                $"c.timestamp > {(eventItem.timestamp - TimeSpan.FromDays(1).TotalMilliseconds)} " +
+            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{eventItem.device_id}' AND " +
+                $"c.timestamp > {(eventItem.timestamp - TimeSpan.FromDays(1).TotalSeconds)} " +
                 "order by c.timestamp";
 
-            logger.LogInformation(sqlQueryText);
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<EventItem> queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
@@ -120,11 +131,10 @@ namespace Waterly_iot_functions
                 waterReadTimestamp24HoursAgo = eventItem24HoursAgo.timestamp;
             }
 
-            sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {eventItem.device_id} AND " +
-                $"c.timestamp > {(eventItem.timestamp - TimeSpan.FromDays(7).TotalMilliseconds)} " +
+            sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{eventItem.device_id}' AND " +
+                $"c.timestamp > {(eventItem.timestamp - TimeSpan.FromDays(7).TotalSeconds)} " +
                 $"order by c.timestamp";
 
-            logger.LogInformation(sqlQueryText);
             queryDefinition = new QueryDefinition(sqlQueryText);
             queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
 
@@ -138,65 +148,75 @@ namespace Waterly_iot_functions
 
             if (waterRead24HourAgo != 0 && waterRead7DaysAgo != 0)
             {
-                double hoursDiff = TimeSpan.FromMilliseconds(eventItem.timestamp - waterReadTimestamp24HoursAgo).TotalHours;
-                lastDayConsumptionPerHour = (eventItem.water_read - waterReadTimestamp24HoursAgo) / hoursDiff;
-                hoursDiff = TimeSpan.FromMilliseconds(eventItem.timestamp - waterReadTimestamp7DaysAgo).TotalHours;
+                double hoursDiff = TimeSpan.FromSeconds(eventItem.timestamp - waterReadTimestamp24HoursAgo).TotalHours;
+                lastDayConsumptionPerHour = (eventItem.water_read - waterRead24HourAgo) / hoursDiff;
+                hoursDiff = TimeSpan.FromSeconds(eventItem.timestamp - waterReadTimestamp7DaysAgo).TotalHours;
                 lastWeekConsumptionPerHour = (eventItem.water_read - waterRead7DaysAgo) / hoursDiff;
 
                 if (lastDayConsumptionPerHour / lastWeekConsumptionPerHour > 1.5)
                 {
                     //There is a leak
-                    logger.LogInformation(LEAKAGE + $"waterRead24hours: {waterRead24HourAgo}, waterRead7DaysAgo: {waterRead7DaysAgo}");
-                    supressDetection(eventItem, LEAKAGE, userId);
+                    logger.LogInformation(LEAKAGE + $" waterRead24hours: {waterRead24HourAgo}, waterRead7DaysAgo: {waterRead7DaysAgo}");
+                    await suppressDetection(eventItem, LEAKAGE, userId);
                 }
             }
         }
 
 
         // no more than one alert per week
-        public static void supressDetection(EventItem eventItem, string type, string userId)
+        public static async Task suppressDetection(EventItem eventItem, string type, string userId)
         {
-            var now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
+            var now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 
             //we don't want to raise alert on old events
-            if (eventItem.timestamp < now - TimeSpan.FromDays(7).TotalMilliseconds)
+            if (eventItem.timestamp < now - TimeSpan.FromDays(7).TotalSeconds)
             {
                 return;
             }
 
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {eventItem.device_id} AND " +
-                $"c.timestamp >  {(now - TimeSpan.FromDays(7).TotalMilliseconds)} AND " +
-                $"c.type = {type} order by c.timestamp";
+            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{eventItem.device_id}' AND " +
+                $"c.created_at >  {(now - TimeSpan.FromDays(7).TotalSeconds)} AND " +
+                $"c.type = '{type}' order by c.created_at";
 
-            logger.LogInformation(sqlQueryText);
+            logger.LogInformation("Checking older alerts...");
+            
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<AlertItem> queryResultSetIterator = alert_container.GetItemQueryIterator<AlertItem>(queryDefinition);
 
-            if (!queryResultSetIterator.HasMoreResults)
+            if (queryResultSetIterator.HasMoreResults)
             {
-                createAlert(eventItem, type, userId);
+                FeedResponse<AlertItem> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                AlertItem alert = currentResultSet.FirstOrDefault<AlertItem>();
+                if (!Object.Equals(null, alert)){
+                    logger.LogInformation("Detection was suppressed");
+                    return;
+                }                
             }
+            await createAlert(eventItem, type, userId);
         }
 
 
-        public static async void createAlert(EventItem eventItem, string type, string userId)
+        public static async Task createAlert(EventItem eventItem, string type, string userId)
         {
+            logger.LogInformation("Creating alert...");
 
             AlertItem alert = new AlertItem
             {
+                id = Guid.NewGuid().ToString(),
                 device_id = eventItem.device_id,
-                created_at = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                created_at = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                 type = type,
                 user_id = userId,
                 status = false,
                 message = "Contact with technician"
             };
 
-            // Create an item in the container representing alert. Note we provide the value of the partition key for this item, which is "Andersen"
-            ItemResponse<AlertItem> alertResponse = await alert_container.CreateItemAsync<AlertItem>(alert, new PartitionKey(alert.device_id));
+            // Create an item in the container representing alert.
+            ItemResponse<AlertItem> alertResponse = await alert_container.CreateItemAsync<AlertItem>(alert);
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
-            Console.WriteLine("Created item in database with id: {0}\n", alertResponse.Resource.alert_id);
+            Console.WriteLine("Created alert in database with id: {0}\n", alertResponse.Resource.id);
         }
+    
     }
 }
