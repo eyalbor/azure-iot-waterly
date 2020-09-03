@@ -105,6 +105,7 @@ namespace Waterly_iot_functions
         public int year { get; set; }
         public long consumption_sum { get; set; }
         public long last_water_read { get; set; }
+        public long first_water_read { get; set; }
     }
 }
 

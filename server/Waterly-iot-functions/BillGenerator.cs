@@ -6,8 +6,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Linq;
-
-
+using Bugsnag.Payload;
 
 namespace Waterly_iot_functions
 {
@@ -34,7 +33,7 @@ namespace Waterly_iot_functions
         {
             // query devices
 
-            var sqlQueryText = $"SELECT * FROM c WHERE c.userId = {user.id}";
+            var sqlQueryText = $"SELECT * FROM c WHERE c.userId = '{user.id}'";
 
             logger.LogInformation(sqlQueryText);
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
@@ -62,7 +61,7 @@ namespace Waterly_iot_functions
             long waterReadfirstEventInTheLastMonth = 0;
 
             DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {device_id} AND " +
+            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{device_id}' AND " +
             $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
             "order by c.timestamp DESC";
 
@@ -81,7 +80,7 @@ namespace Waterly_iot_functions
             }
 
             DateTime startOfLastMonth = startOfMonth.AddMonths(-1);
-            sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {device_id} AND " +
+            sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{device_id}' AND " +
             $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
             "order by c.timestamp DESC";
 
@@ -101,11 +100,9 @@ namespace Waterly_iot_functions
             if (waterReadfirstEventInTheLastMonth < waterReadfirstEventInTheMonth)
             {
                 deviceConsumption = waterReadfirstEventInTheMonth - waterReadfirstEventInTheLastMonth;
+                await createMonthlyDeviceConsumptionItem(device_id, today.AddMonths(-1), deviceConsumption,
+                     waterReadfirstEventInTheMonth, waterReadfirstEventInTheLastMonth);
             }
-
-            await createMonthlyDeviceConsumptionItem(device_id, today.AddMonths(-1), deviceConsumption,
-                waterReadfirstEventInTheMonth, waterReadfirstEventInTheLastMonth);
-
             return deviceConsumption;
 
         }

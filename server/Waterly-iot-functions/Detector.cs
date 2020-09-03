@@ -4,15 +4,11 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace Waterly_iot_functions
 {
     public static class Detector
     {
-
-        public static Container events_container = Function1.cosmosClient.GetContainer("waterly_db", "water_table");
-        public static Container alert_container = Function1.cosmosClient.GetContainer("waterly_db", "alerts_table");
         public static String LEAKAGE = "Leakage";
         public static String ABNORMAL_PH_LEVEL = "Abnormal PH level";
         public static String ABNORMAL_PRESSURE_LEVEL = "Abnormal pressure level";
@@ -42,7 +38,7 @@ namespace Waterly_iot_functions
 
             logger.LogInformation("Observing PH level...");
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<EventItem> queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
 
             while (queryResultSetIterator.HasMoreResults)
@@ -77,7 +73,7 @@ namespace Waterly_iot_functions
 
             logger.LogInformation("Observing pressure level...");
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<EventItem> queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
 
             while (queryResultSetIterator.HasMoreResults)
@@ -120,7 +116,7 @@ namespace Waterly_iot_functions
                 "order by c.timestamp";
 
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<EventItem> queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
 
             while (queryResultSetIterator.HasMoreResults)
@@ -136,7 +132,7 @@ namespace Waterly_iot_functions
                 $"order by c.timestamp";
 
             queryDefinition = new QueryDefinition(sqlQueryText);
-            queryResultSetIterator = events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
 
             while (queryResultSetIterator.HasMoreResults)
             {
@@ -181,7 +177,7 @@ namespace Waterly_iot_functions
             logger.LogInformation("Checking older alerts...");
             
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<AlertItem> queryResultSetIterator = alert_container.GetItemQueryIterator<AlertItem>(queryDefinition);
+            FeedIterator<AlertItem> queryResultSetIterator = Resources.alert_container.GetItemQueryIterator<AlertItem>(queryDefinition);
 
             if (queryResultSetIterator.HasMoreResults)
             {
@@ -212,7 +208,7 @@ namespace Waterly_iot_functions
             };
 
             // Create an item in the container representing alert.
-            ItemResponse<AlertItem> alertResponse = await alert_container.CreateItemAsync<AlertItem>(alert);
+            ItemResponse<AlertItem> alertResponse = await Resources.alert_container.CreateItemAsync<AlertItem>(alert);
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
             Console.WriteLine("Created alert in database with id: {0}\n", alertResponse.Resource.id);
