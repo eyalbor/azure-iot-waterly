@@ -351,7 +351,7 @@ namespace Waterly_iot_functions
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
         public static async Task createBill(
-            [TimerTrigger("0 0 * * * *")]TimerInfo myTimer,
+            [TimerTrigger("0 * * * * *")]TimerInfo myTimer,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "users_table",
