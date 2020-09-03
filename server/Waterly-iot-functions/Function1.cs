@@ -44,7 +44,7 @@ namespace Waterly_iot_functions
 
             DeviceItem deviceItem = Resources.docClient.CreateDocumentQuery<DeviceItem>(
                 UriFactory.CreateDocumentCollectionUri("waterly_db", "waterly_devices"), option)
-                .Where(deviceItem => deviceItem.device_id.Equals(device_id))
+                .Where(deviceItem => deviceItem.id.Equals(device_id))
                 .AsEnumerable()
                 .First();
 
@@ -83,7 +83,7 @@ namespace Waterly_iot_functions
             log.LogInformation("http request for devices of user id");
             foreach (DeviceItem device_item in devices)
             {
-                log.LogInformation($"device id is : {device_item.device_id}");
+                log.LogInformation($"device id is : {device_item.id}");
                 devicesList.Add(device_item);
             }
             return new OkObjectResult(devicesList);
@@ -351,7 +351,7 @@ namespace Waterly_iot_functions
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
         public static async Task createBill(
-            [TimerTrigger("0 * * * * *")]TimerInfo myTimer,
+            [TimerTrigger("0 0 * * * *")]TimerInfo myTimer,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "users_table",
