@@ -31,8 +31,6 @@ namespace Waterly_iot_functions
 
     public class DeviceItem
     {
-        public string device_id { get; set; }
-
         public string userId { get; set; }
 
         public string name { get; set; }
@@ -105,6 +103,8 @@ namespace Waterly_iot_functions
         public int year { get; set; }
         public long consumption_sum { get; set; }
         public long last_water_read { get; set; }
+        public long first_water_read { get; set; }
+
     }
 }
 

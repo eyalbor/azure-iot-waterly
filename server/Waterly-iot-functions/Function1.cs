@@ -23,7 +23,7 @@ namespace Waterly_iot_functions
     public static class Function1
     {
  	[FunctionName("InsertEvent")]
-        public static async Task Run([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
+        public static async Task InsertEvent([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
         {
 
             log.LogInformation("C# event hub trigger function processed events.");
@@ -44,7 +44,7 @@ namespace Waterly_iot_functions
 
             DeviceItem deviceItem = Resources.docClient.CreateDocumentQuery<DeviceItem>(
                 UriFactory.CreateDocumentCollectionUri("waterly_db", "waterly_devices"), option)
-                .Where(deviceItem => deviceItem.device_id.Equals(device_id))
+                .Where(deviceItem => deviceItem.id.Equals(device_id))
                 .AsEnumerable()
                 .First();
 
@@ -66,8 +66,8 @@ namespace Waterly_iot_functions
 
 
         [FunctionName("get_devices_by_user_id")]
-        public static IActionResult Run2(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "devices/{userId}")] HttpRequest request,
+        public static IActionResult getDevicesOfUser(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "devices/userId={userId}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "waterly_devices",
@@ -83,16 +83,16 @@ namespace Waterly_iot_functions
             log.LogInformation("http request for devices of user id");
             foreach (DeviceItem device_item in devices)
             {
-                log.LogInformation($"device id is : {device_item.device_id}");
+                log.LogInformation($"device id is : {device_item.id}");
                 devicesList.Add(device_item);
             }
             return new OkObjectResult(devicesList);
         }
 
-/*
 
-        [FunctionName("get_devices_by_user_id")]
-        public static async IActionResult Run12(
+
+        [FunctionName("get_comsumption_of_user")]
+        public static async Task<IActionResult> getUserConsumption(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consumption_per_month/userId={userId}")] HttpRequest request,
         [CosmosDB(
                 databaseName: "waterly_db",
@@ -103,8 +103,8 @@ namespace Waterly_iot_functions
                 ILogger log)
 
         {
-            Container BillsContainer = cosmosClient.GetContainer("waterly_db", "bill_table");
-            Container ConsumptionContainer = cosmosClient.GetContainer("waterly_db", "consumption_device_month");
+            Container BillsContainer = Resources.cosmosClient.GetContainer("waterly_db", "bill_table");
+            Container ConsumptionContainer = Resources.cosmosClient.GetContainer("waterly_db", "consumption_device_month");
 
 
             //for all year, dict for month number and dict userConsumptionPerMonthDict
@@ -118,44 +118,61 @@ namespace Waterly_iot_functions
                 //Add avg per month
                 QueryDefinition bills_query = new QueryDefinition("SELECT top 1 avg FROM b WHERE b.month = @month_num").WithParameter("@month_num", month_num);
                 FeedIterator<long> bill_iterator = BillsContainer.GetItemQueryIterator<long>(bills_query);
-                long avg = await bill_iterator.ReadNextAsync();
+
+
+                Microsoft.Azure.Cosmos.FeedResponse<long> currentResultSet;
+
+                long avg = 0;
+                while (bill_iterator.HasMoreResults)
+                {
+                    currentResultSet = await bill_iterator.ReadNextAsync();
+                    avg = currentResultSet.First();
+                    break;
+                } 
                 userConsumptionPerMonthDict.Add("Average", avg);
 
                 foreach (DeviceItem device_item in devices)
                 {
                     //calculate sum for month_num for device_item
-                    QueryDefinition consumption_query = new QueryDefinition("SELECT consumption_sum FROM c WHERE c.month = @month_num AND c.year = @year AND c.device_id = @device_id").WithParameter("@month_num", month_num).WithParameter("@year", DateTime.Today.Year).WithParameter("@device_id", device_item.device_id);
+                    QueryDefinition consumption_query = new QueryDefinition("SELECT consumption_sum FROM c WHERE c.month = @month_num AND c.year = @year AND c.device_id = @device_id").WithParameter("@month_num", month_num).WithParameter("@year", DateTime.Today.Year).WithParameter("@device_id", device_item.id);
                     FeedIterator<long> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<long>(consumption_query);
-                    long consumption_per_device_month = await bill_iterator.ReadNextAsync();
+                    long consumption_per_device_month = 0;
+                     
+                    while (consumption_iterator.HasMoreResults)
+                    {
+                        currentResultSet = await consumption_iterator.ReadNextAsync();
+                        consumption_per_device_month = currentResultSet.First();
+                        break;
+                    }
+
 
                     //add to dict
-                    userConsumptionPerMonthDict.Add(device_item.device_id, consumption_per_device_month);
+                    userConsumptionPerMonthDict.Add(device_item.id, consumption_per_device_month);
                 }
 
                 userConsumptionDict.Add(month_num, userConsumptionPerMonthDict); 
             }
-            
+
             return new OkObjectResult(userConsumptionDict);
         }
 
-            */
+            
 
 
 
         [FunctionName("get_events_by_device_id")]
-        public static IActionResult Run3(
+        public static IActionResult getEventsByDeviceId(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/{device_id}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
-                SqlQuery = "SELECT top 20 * FROM c WHERE c.device_id = {device_id} order by c.timestamp desc", //todo: remember to change here
+                SqlQuery = "SELECT top 20 * FROM c WHERE c.id = {device_id} order by c.timestamp desc", //todo: remember to change here
                 ConnectionStringSetting = "CosmosDBConnection")]
                 IEnumerable<EventItem> events,
                 ILogger log)
 
 
         {
-
             List<EventItem> eventsList = new List<EventItem>();
             log.LogInformation("http request for events of device id");
             foreach (EventItem event_item in events)
@@ -168,13 +185,11 @@ namespace Waterly_iot_functions
 
 
         [FunctionName("update_bill_paid")]
-        public static async void Run6(
+        public static async Task<IActionResult> updateBillPaid(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, //todo: make sure http request is right
                 ILogger log)
 
-
         {
-
             string bill_id = "{bill_id}";
 
             Container bills_container = Resources.cosmosClient.GetContainer("waterly_db", "bills_table");
@@ -194,11 +209,13 @@ namespace Waterly_iot_functions
                 bill_to_pay);
 
             var updated = response.Resource;
+
+            return new OkObjectResult(bill_to_pay);
         }
 
 
         [FunctionName("get_bills_by_user_id")]
-        public static IActionResult Run7(
+        public static IActionResult getBillsByUserId(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "bills/userId={userId}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
@@ -215,14 +232,14 @@ namespace Waterly_iot_functions
             log.LogInformation("http request for bills of user id");
             foreach (BillItem bill in bills)
             {
-                log.LogInformation($"bill id is : {bill.bill_id}");
+                log.LogInformation($"bill id is : {bill.id}");
                 bills_list.Add(bill);
             }
             return new OkObjectResult(bills_list);
         }
 
         [FunctionName("get_alerts_by_user_id")]
-        public static IActionResult Run4(
+        public static IActionResult getAlertsByUserId(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "notifications/user_id={userId}")] HttpRequest request,
         [CosmosDB(
                 databaseName: "waterly_db",
@@ -248,12 +265,12 @@ namespace Waterly_iot_functions
 
         [FunctionName("get_ph_by_device_id")]
         public static IActionResult getPhByUserId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/{device_id}")] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ph/{device_id}")] HttpRequest request, //todo: eyal - we changed the route
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
                 ConnectionStringSetting = "CosmosDBConnection",
-                SqlQuery = "SELECT TOP 10 * FROM c WHERE c.device_id = '{device_id}' order by c.timestamp DESC")]
+                SqlQuery = "SELECT TOP 10 * FROM c WHERE c.id = '{device_id}' order by c.timestamp DESC")]
                 IEnumerable<EventItem> events,
                 ILogger log)
 
@@ -272,12 +289,12 @@ namespace Waterly_iot_functions
 
         [FunctionName("get_pressure_by_device_id")]
         public static IActionResult getPressureByUserId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/{device_id}")] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pressure/{device_id}")] HttpRequest request, //todo: eyal - we changed the route
             [CosmosDB(
                         databaseName: "waterly_db",
                         collectionName: "water_table",
                         ConnectionStringSetting = "CosmosDBConnection",
-                        SqlQuery = "SELECT TOP 10 * FROM c WHERE c.device_id = '{device_id}' order by c.timestamp DESC")]
+                        SqlQuery = "SELECT TOP 10 * FROM c WHERE c.id = '{device_id}' order by c.timestamp DESC")]
                         IEnumerable<EventItem> events,
                 ILogger log)
 
@@ -296,7 +313,7 @@ namespace Waterly_iot_functions
 
 
         [FunctionName("create_device")]
-        public static async Task Run8(
+        public static async Task<IActionResult> createDevice(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{user_id}")] HttpRequest request, ILogger log) //route?
         {
             Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
@@ -305,28 +322,30 @@ namespace Waterly_iot_functions
             DeviceItem deviceJson = JsonConvert.DeserializeObject<DeviceItem>("check"); //check with eyal's client how it's sent
 
             await devices_container.CreateItemAsync(deviceJson);
+
+            return new OkObjectResult(deviceJson);
         }
 
         /*
         [FunctionName("delete_device")]
-        public static async Task Run9(
+        public static async Task delete_device(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{device_id}")] HttpRequest request, ILogger log) //route?
         {
             Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
 
             string device_id = "{device_id}";
 
-            //await devices_container.DeleteItemAsync(device_id); todo:delete
+            //await devices_container.DeleteItemAsync(device_id);
         }
         */
 
         [FunctionName("update_alert")]
-        public static async void Run10(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notification.id}")] HttpRequest request,
-                ILogger log)
+        public static async Task<IActionResult> updateAlert(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notificationId}")] HttpRequest request, string notificationId,
+        ILogger log)
 
         {
-            string alert_id = "{notification.id}";
+            string alert_id = notificationId;
 
             Container alerts_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
 
@@ -338,13 +357,22 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            alert_to_update.status = false; //todo: get from the request body the current status and change it.
-
+            //swipe boolean status
+           if (alert_to_update.status == true)
+            {
+                alert_to_update.status = false;
+            } else
+            {
+                alert_to_update.status = true;
+            }
+            
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "alerts_table", alert_to_update.id),
                 alert_to_update);
 
             var updated = response.Resource;
+
+            return new OkObjectResult(alert_to_update);
         }
 
 
@@ -381,6 +409,37 @@ namespace Waterly_iot_functions
             {
                 await BillGenerator.generateNewBill(keyValuePair.Key, keyValuePair.Value, DateTime.Today, avgConsumption);
             }
+        }
+
+
+        [FunctionName("edit_device_name")]
+        public static async Task<IActionResult> EditDeviceName(
+    [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "devices/{id}")] HttpRequest request, string id,
+ILogger log)
+
+        {
+            string device_id = id;
+
+            Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
+
+            var option = new FeedOptions { EnableCrossPartitionQuery = true };
+
+            DeviceItem device_to_update = Resources.docClient.CreateDocumentQuery<DeviceItem>(
+                UriFactory.CreateDocumentCollectionUri("waterly_db", "waterly_devices"), option)
+                .Where(device_to_update => device_to_update.id.Equals(device_id))
+                .AsEnumerable()
+                .First();
+
+            //device_to_update.name = request;
+
+
+            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
+                UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", device_to_update.id),
+                device_to_update);
+
+            var updated = response.Resource;
+
+            return new OkObjectResult(device_to_update);
         }
     }
 }

@@ -11,8 +11,8 @@ namespace Waterly_iot_functions
     public static class Detector
     {
 
-        public static Container events_container = Function1.cosmosClient.GetContainer("waterly_db", "water_table");
-        public static Container alert_container = Function1.cosmosClient.GetContainer("waterly_db", "alerts_table");
+        public static Container events_container = Resources.cosmosClient.GetContainer("waterly_db", "water_table");
+        public static Container alert_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
         public static String LEAKAGE = "Leakage";
         public static String ABNORMAL_PH_LEVEL = "Abnormal PH level";
         public static String ABNORMAL_PRESSURE_LEVEL = "Abnormal pressure level";

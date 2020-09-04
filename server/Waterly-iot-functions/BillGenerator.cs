@@ -24,7 +24,7 @@ namespace Waterly_iot_functions
             long totalConsumption = 0;
             foreach (DeviceItem device in userDevices)
             {
-                totalConsumption += await calculateDeviceConsumption(device.device_id, today);
+                totalConsumption += await calculateDeviceConsumption(device.id, today);
             }
             return totalConsumption;
 
@@ -62,7 +62,7 @@ namespace Waterly_iot_functions
             long waterReadfirstEventInTheLastMonth = 0;
 
             DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {device_id} AND " +
+            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.id = {device_id} AND " +
             $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
             "order by c.timestamp DESC";
 

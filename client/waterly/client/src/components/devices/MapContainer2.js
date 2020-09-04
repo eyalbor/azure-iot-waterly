@@ -16,7 +16,7 @@ export class MapContainer2 extends Component {
     displayMarkers(){
         return this.props.devices.map(device => {
             return (
-                <Marker key= {device.device_id} position={[device.lan, device.lng]}>
+                <Marker key= {device.device_id} position={[device.lat, device.lng]}>
                     <Popup>
                         {device.device_id}
                     </Popup>

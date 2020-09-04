@@ -52,7 +52,7 @@ const tableIcons = {
 
 const DeviceTable = ({userId}) => {
     const [columns, setColumns] = useState([
-        {title: "Device id", field: "device_id", editable: 'never'},
+        {title: "Device id", field: "id", editable: 'never'},
         {title: "Name", field: "name", editable: 'onUpdate'},
         {title: "Meter Reading [m^3/s]", field: "last_water_read", editable: 'never'},
         {title: "Last Update", field: "last_update_timestamp", editable: 'never', render: rowData => renderTime(rowData.last_update_timestamp)}
