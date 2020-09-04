@@ -379,7 +379,7 @@ namespace Waterly_iot_functions
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
         public static async Task createBill(
-            [TimerTrigger("0 0 9 10 * *")]TimerInfo myTimer,
+            [TimerTrigger("0 * * * * *")]TimerInfo myTimer,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "users_table",
@@ -397,7 +397,7 @@ namespace Waterly_iot_functions
 
             long sumConsumption = 0;
             Dictionary<UserItem, long> userConsumptionDict = new Dictionary<UserItem, long>();
-            
+
             foreach (UserItem user in users)
             {
                 long userConsumption = await BillGenerator.calculateUserConsumption(user, log, DateTime.Today);

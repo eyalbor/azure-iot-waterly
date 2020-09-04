@@ -6,8 +6,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Linq;
-
-
+using Bugsnag.Payload;
 
 namespace Waterly_iot_functions
 {
@@ -34,7 +33,7 @@ namespace Waterly_iot_functions
         {
             // query devices
 
-            var sqlQueryText = $"SELECT * FROM c WHERE c.userId = {user.id}";
+            var sqlQueryText = $"SELECT * FROM c WHERE c.userId = '{user.id}'";
 
             logger.LogInformation(sqlQueryText);
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
@@ -62,9 +61,13 @@ namespace Waterly_iot_functions
             long waterReadfirstEventInTheLastMonth = 0;
 
             DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
+<<<<<<< HEAD
             var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.id = {device_id} AND " +
+=======
+            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{device_id}' AND " +
+>>>>>>> 04197073bce819583eb0d243efaa6e36494e0cf4
             $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
-            "order by c.timestamp DESC";
+            "order by c.timestamp";
 
             // query first water read of this month
 
@@ -81,9 +84,9 @@ namespace Waterly_iot_functions
             }
 
             DateTime startOfLastMonth = startOfMonth.AddMonths(-1);
-            sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = {device_id} AND " +
-            $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
-            "order by c.timestamp DESC";
+            sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{device_id}' AND " +
+            $"c.timestamp > {((DateTimeOffset)startOfLastMonth).ToUnixTimeSeconds()} " +
+            "order by c.timestamp";
 
             // query first water read of last month
 
@@ -101,11 +104,9 @@ namespace Waterly_iot_functions
             if (waterReadfirstEventInTheLastMonth < waterReadfirstEventInTheMonth)
             {
                 deviceConsumption = waterReadfirstEventInTheMonth - waterReadfirstEventInTheLastMonth;
+                await createMonthlyDeviceConsumptionItem(device_id, today.AddMonths(-1), deviceConsumption,
+                     waterReadfirstEventInTheMonth, waterReadfirstEventInTheLastMonth);
             }
-
-            await createMonthlyDeviceConsumptionItem(device_id, today.AddMonths(-1), deviceConsumption,
-                waterReadfirstEventInTheMonth, waterReadfirstEventInTheLastMonth);
-
             return deviceConsumption;
 
         }
@@ -115,7 +116,7 @@ namespace Waterly_iot_functions
         {
             MonthlyDeviceConsumptionItem monthlyDeviceConsumptionItem = new MonthlyDeviceConsumptionItem()
             {
-                id = Guid.NewGuid().ToString(),
+                id = $"{device_id}/{period.Month}/{period.Year}",
                 consumption_sum = consuption,
                 month = period.Month,
                 year = period.Year,
@@ -126,7 +127,7 @@ namespace Waterly_iot_functions
 
             // Create an item in the container representing the bill.
             ItemResponse<MonthlyDeviceConsumptionItem> monthlyConsumptionResponse = 
-                await Resources.monthly_consumption_container.CreateItemAsync<MonthlyDeviceConsumptionItem>(monthlyDeviceConsumptionItem);
+                await Resources.monthly_consumption_container.UpsertItemAsync<MonthlyDeviceConsumptionItem>(monthlyDeviceConsumptionItem);
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
             Console.WriteLine("Created item in database with id: {0}\n", monthlyConsumptionResponse.Resource.id);
@@ -140,7 +141,7 @@ namespace Waterly_iot_functions
 
             BillItem bill = new BillItem
             {
-                id = Guid.NewGuid().ToString(),
+                id = $"{user.id}/{billPeriod.Month}/{billPeriod.Year}",
                 user_id = user.id,
                 avg = avarage,
                 status = false,
@@ -152,7 +153,7 @@ namespace Waterly_iot_functions
             };
 
             // Create an item in the container representing the bill.
-            ItemResponse<BillItem> billResponse = await Resources.bill_container.CreateItemAsync<BillItem>(bill);
+            ItemResponse<BillItem> billResponse = await Resources.bill_container.UpsertItemAsync<BillItem>(bill);
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
             Console.WriteLine("Created item in database with id: {0}\n", billResponse.Resource.id);
