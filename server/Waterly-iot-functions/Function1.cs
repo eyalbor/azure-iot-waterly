@@ -184,14 +184,13 @@ namespace Waterly_iot_functions
         }
 
 
-        [FunctionName("update_bill_paid")] //still doesn't work
+        [FunctionName("update_bill_paid")] //works
         public static async Task<IActionResult> updateBillPaid(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, //todo: make sure http request is right
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,//todo: make sure http request is right
                 ILogger log)
 
         {
-            string bill_id = "{bill_id}";
-
+       
             Container bills_container = Resources.cosmosClient.GetContainer("waterly_db", "bills_table");
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
@@ -327,7 +326,7 @@ namespace Waterly_iot_functions
         }
 
         
-        [FunctionName("delete_device")]
+        [FunctionName("delete_device")] //works
         public static async Task<IActionResult> delete_device(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "devices/{device_id}")] HttpRequest request, string device_id, ILogger log) //
         {

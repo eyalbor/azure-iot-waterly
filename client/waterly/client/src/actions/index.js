@@ -54,9 +54,9 @@ export const updateNotification = (notification) => async (dispatch) => {
     dispatch({type: EDIT_NOTIFICATION, payload: response.data})
 };
 
-export const createDevice = (formValues) => async (dispatch, getState) => {
+export const createDevice = (userId,formValues) => async (dispatch, getState) => {
     const { userId } = getState().auth;
-    const response = await myUrl.post('/devices', {...formValues, userId });
+    const response = await myUrl.post(`/devices/${userId}`, {...formValues, userId });
     dispatch({type: CREATE_DEVICE, payload: response.data})
     //programmatic navigation to streamList
     history.push('devices/list');
