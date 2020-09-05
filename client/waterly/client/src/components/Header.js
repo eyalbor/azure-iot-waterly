@@ -56,7 +56,7 @@ class Header extends React.Component {
                             <div className="ui list" style={{padding: "20px"}}>
                                 {this.showNotifications()}
                                 <div className="divider"></div>
-                                <a href={'/notifications'}>See All Alert</a>
+                                <a href={'/notifications'}>See All Alerts</a>
                             </div>
                         </div>
                     </button >

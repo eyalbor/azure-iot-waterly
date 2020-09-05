@@ -118,7 +118,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
             enabled={true}
             location="edge"
           />
-          <Title text="My Consumption Of Water" />
+          <Title text="Your Monthly Water Consumption" />
         </Chart>
         </Paper>
       );

@@ -11,7 +11,7 @@ class HomePage extends React.Component {
                         <h2 className="ui violet header">
                             <b>Waterly</b>
                         </h2>
-                        <h3>Keep your water safe.</h3>
+                        <h3>Your Water Consumption Just Got Smarter.</h3>
                         {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
                         <img alt="kineret" src="/kineret.png" className="ui medium centered image"/>
                     </div>
