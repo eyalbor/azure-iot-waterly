@@ -4,6 +4,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Waterly_iot_functions
 {
@@ -163,7 +164,7 @@ namespace Waterly_iot_functions
 
 
         // no more than one alert per week
-        public static async Task suppressDetection(EventItem eventItem, string type, string userId)
+        public static async Task suppressDetection(EventItem eventItem, string type, string userId, Dictionary<string,int> evidence)
         {
             var now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 
@@ -191,7 +192,7 @@ namespace Waterly_iot_functions
                     return;
                 }                
             }
-            await createAlert(eventItem, type, userId);
+            await createAlert(eventItem, type, userId, evidence);
         }
 
 

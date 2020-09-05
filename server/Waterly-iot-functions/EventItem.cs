@@ -59,6 +59,7 @@ namespace Waterly_iot_functions
     {
         public string id { get; set; }
         public string device_id { get; set; }
+        public string device_name { get; set; }
         public string user_id { get; set; }
         public string type { get; set; }
         public long created_at { get; set; }
@@ -71,6 +72,7 @@ namespace Waterly_iot_functions
     {
         public string id { get; set; }
         public string device_id { get; set; }
+        public string user_id { get; set; }
         public int month { get; set; }
         public int year { get; set; }
         public long consumption_sum { get; set; }

@@ -15,15 +15,14 @@ namespace Waterly_iot_functions
         public static int FIXED_EXPENSES = 20;
         private static ILogger logger;
 
-
         public static async Task<long> calculateUserConsumption(UserItem user, ILogger log, DateTime today)
         {
-            logger = log;
+            logger = log;   
             List<DeviceItem> userDevices = await getUserDevices(user);
             long totalConsumption = 0;
             foreach (DeviceItem device in userDevices)
             {
-                totalConsumption += await calculateDeviceConsumption(device.id, today);
+                totalConsumption += await calculateDeviceConsumption(device.id, today, user.id);
             }
             return totalConsumption;
 
@@ -35,7 +34,6 @@ namespace Waterly_iot_functions
 
             var sqlQueryText = $"SELECT * FROM c WHERE c.userId = '{user.id}'";
 
-            logger.LogInformation(sqlQueryText);
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<DeviceItem> queryResultSetIterator = Resources.devices_container.GetItemQueryIterator<DeviceItem>(queryDefinition);
             FeedResponse<DeviceItem> currentResultSet;
@@ -54,24 +52,21 @@ namespace Waterly_iot_functions
             return deviceList;
         }
 
-        public static async Task<long> calculateDeviceConsumption(string device_id, DateTime today)
+        public static async Task<long> calculateDeviceConsumption(string device_id, DateTime today, string user_id)
         {
             long deviceConsumption = 0;
             long waterReadfirstEventInTheMonth = 0;
             long waterReadfirstEventInTheLastMonth = 0;
 
+            logger.LogInformation($"Calculating device consumption: {device_id}");
+
             DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
-<<<<<<< HEAD
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.id = {device_id} AND " +
-=======
             var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{device_id}' AND " +
->>>>>>> 04197073bce819583eb0d243efaa6e36494e0cf4
             $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
             "order by c.timestamp";
 
             // query first water read of this month
 
-            logger.LogInformation(sqlQueryText);
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
             FeedResponse<EventItem> currentResultSet;
@@ -90,7 +85,6 @@ namespace Waterly_iot_functions
 
             // query first water read of last month
 
-            logger.LogInformation(sqlQueryText);
             queryDefinition = new QueryDefinition(sqlQueryText);
             queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
          
@@ -105,22 +99,23 @@ namespace Waterly_iot_functions
             {
                 deviceConsumption = waterReadfirstEventInTheMonth - waterReadfirstEventInTheLastMonth;
                 await createMonthlyDeviceConsumptionItem(device_id, today.AddMonths(-1), deviceConsumption,
-                     waterReadfirstEventInTheMonth, waterReadfirstEventInTheLastMonth);
+                     waterReadfirstEventInTheMonth, waterReadfirstEventInTheLastMonth, user_id);
             }
             return deviceConsumption;
 
         }
 
         public static async Task createMonthlyDeviceConsumptionItem(string device_id, DateTime period, long consuption,
-            long waterReadfirstEventInTheMonth, long waterReadfirstEventInTheLastMonth)
+            long waterReadfirstEventInTheMonth, long waterReadfirstEventInTheLastMonth, string user_id)
         {
             MonthlyDeviceConsumptionItem monthlyDeviceConsumptionItem = new MonthlyDeviceConsumptionItem()
             {
-                id = $"{device_id}/{period.Month}/{period.Year}",
+                id = $"{device_id}-{period.Month}-{period.Year}",
                 consumption_sum = consuption,
                 month = period.Month,
                 year = period.Year,
                 device_id = device_id,
+                user_id = user_id,
                 first_water_read = waterReadfirstEventInTheLastMonth,
                 last_water_read = waterReadfirstEventInTheMonth
             };
@@ -141,9 +136,9 @@ namespace Waterly_iot_functions
 
             BillItem bill = new BillItem
             {
-                id = $"{user.id}/{billPeriod.Month}/{billPeriod.Year}",
+                id = $"{user.id}-{billPeriod.Month}-{billPeriod.Year}",
                 user_id = user.id,
-                avg = avarage,
+                avg = 10 * (float)Math.Floor(avarage / 1000000),
                 status = false,
                 month = billPeriod.Month,
                 year = billPeriod.Year,
