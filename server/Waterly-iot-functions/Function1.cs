@@ -362,8 +362,8 @@ namespace Waterly_iot_functions
         }
         
 
-        [FunctionName("update_alert")]
-        public static async Task<IActionResult> updateAlert(
+        [FunctionName("update_alert_status")]
+        public static async Task<IActionResult> updateAlertStatus(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notificationId}")] HttpRequest request, string notificationId,
         ILogger log)
 
@@ -398,7 +398,35 @@ namespace Waterly_iot_functions
             return new OkObjectResult(alert_to_update);
         }
 
-        //todo: add function update alert feedback
+        [FunctionName("update_alert_feedback")]
+        public static async Task<IActionResult> updateAlertFeedback(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/feedback_alert_id={notificationId}")] HttpRequest request, string notificationId,
+        ILogger log)
+
+        {
+            string alert_id = notificationId;
+
+            Container alerts_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
+
+            var option = new FeedOptions { EnableCrossPartitionQuery = true };
+
+            AlertItem alert_to_update = Resources.docClient.CreateDocumentQuery<AlertItem>(
+                UriFactory.CreateDocumentCollectionUri("waterly_db", "alerts_table"), option)
+                .Where(alert_to_update => alert_to_update.id.Equals(alert_id))
+                .AsEnumerable()
+                .First();
+
+            alert_to_update.feedback = true; //todo: change according to how eyal send it
+
+            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
+                UriFactory.CreateDocumentUri("waterly_db", "alerts_table", alert_to_update.id),
+                alert_to_update);
+
+            var updated = response.Resource;
+
+            return new OkObjectResult(alert_to_update);
+        }
+
 
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
