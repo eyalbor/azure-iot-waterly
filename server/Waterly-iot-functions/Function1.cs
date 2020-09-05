@@ -16,6 +16,8 @@ using Microsoft.Azure.Documents;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
+using Bugsnag.Payload;
+
 namespace Waterly_iot_functions
 {
 
@@ -310,21 +312,28 @@ namespace Waterly_iot_functions
         }
 
 
-
+        /*
         [FunctionName("create_device")] //todo: need to add device registration
         public static async Task<IActionResult> createDevice(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{user_id}")] HttpRequest request, ILogger log) //route?
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{user_id}")] HttpRequest request, string user_id, ILogger log) //not working yet
         {
             Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
 
+            DeviceItem device_to_create = new DeviceItem();
 
-            DeviceItem deviceJson = JsonConvert.DeserializeObject<DeviceItem>("check"); //check with eyal's client how it's sent
+            IFormCollection form_values = request.Form;
 
-            await devices_container.CreateItemAsync(deviceJson);
+            device_to_create.id = Guid.NewGuid().ToString();
+            device_to_create.userId = user_id;
+            device_to_create.status = true;
+            //device_to_create.address = 
+            //device_to_create.name = form_values
 
-            return new OkObjectResult(deviceJson);
+            await devices_container.CreateItemAsync(device_to_create);
+
+            return new OkObjectResult(device_to_create);
         }
-
+        */
         
         [FunctionName("delete_device")] //works
         public static async Task<IActionResult> delete_device(
