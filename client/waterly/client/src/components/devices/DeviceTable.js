@@ -162,22 +162,12 @@ const DeviceTable = ({userId}) => {
                         })
                     }}
                     editable={{
-                        onRowUpdate: (newData, oldData) =>
-                            new Promise((resolve) => {
-                            handleRowUpdate(newData, oldData, resolve);
-                        }),
                         onRowDelete: (oldData) =>
                         new Promise((resolve) => {
                             handleRowDelete(oldData, resolve)
                         })
                     }}
                     actions={[
-                        rowData => ({
-                            icon: () => <SyncIcon/>,
-                            tooltip: "Sync With Device",
-                            onClick: (event, rowData) =>
-                                console.log("You are sync " + rowData)
-                        }),
                         rowData =>({
                             icon: () => <Link style={{ color: '#000' }} to={`/events/device/${rowData.device_id}`}><EventIcon/></Link>,
                             tooltip: "Device Events",
@@ -191,3 +181,17 @@ const DeviceTable = ({userId}) => {
 }
 
 export default DeviceTable;
+
+
+{/* onRowUpdate: (newData, oldData) =>
+    new Promise((resolve) => {
+    handleRowUpdate(newData, oldData, resolve);
+}) */}
+
+    {/* rowData => ({
+    icon: () => <SyncIcon/>,
+    tooltip: "Sync With Device",
+    onClick: (event, rowData) =>
+        console.log("You are sync " + rowData)
+}), */}
+                        
