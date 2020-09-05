@@ -98,8 +98,7 @@ const DeviceTable = ({userId}) => {
             .catch(error => {
                 setErrorMessages(["Update failed! Server error"])
                 setIserror(true)
-                resolve()
-                
+                resolve()       
             })
         }else{
             setErrorMessages(errorList)

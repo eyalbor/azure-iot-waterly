@@ -45,6 +45,7 @@ export const consumptionForYearEachMonth = (userId) => {
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
     const response = await myUrl.get(`/notifications/user_id=${userId}`);
+    console.log(response.data)
     dispatch({type: FETCH_NOTIFICATIONS, payload: response.data})
 };
 
@@ -96,12 +97,13 @@ export const fetchEvents = (deviceId) => async (dispatch) => {
 export const fetchBills = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
     const response = await myUrl.get(`/bills/userId=${userId}`);
+    //console.log(response.data)
     dispatch({type: FETCH_BILLS, payload: response.data})
 }
 
 export const payForBill = (bill) => async (dispatch) => {
     console.log('payForBill')   
     const response = await myUrl.patch(`/bills/${bill.id}`);
-    console.log(response)
+    //console.log(response)
     dispatch({type: PAY_BILL, payload: response.data})
 }
