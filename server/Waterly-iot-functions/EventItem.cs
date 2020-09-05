@@ -33,6 +33,7 @@ namespace Waterly_iot_functions
         public long last_update_timestamp { get; set; }
         public float lat { get; set; }
         public float lng { get; set; }
+        public bool status { get; set; } //true = active, false = deleted
     }
 
     public class UserItem

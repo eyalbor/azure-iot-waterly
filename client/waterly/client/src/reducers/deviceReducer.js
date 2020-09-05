@@ -19,7 +19,7 @@ export default (state = {}, action ) => {
         case EDIT_DEVICE:
             return {...state, [action.payload.device_id]: action.payload};
         case DELETE_DEVICE:
-            return _.omit(state, action.payload);
+            return {...state, [action.payload.device_id]: action.payload};
         default:
             return state;
     }

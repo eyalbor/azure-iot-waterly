@@ -66,7 +66,7 @@ class DeviceList extends React.Component {
                 <br/>
                 {this.renderCreate()}
                 <br/>
-                <ConsumptionDeviceMonth/>
+                <ConsumptionDeviceMonth userId={this.props.currentUserId}/>
                 <br/>
                 <MapContainer2/>
             </div>

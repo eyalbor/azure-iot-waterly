@@ -22,7 +22,7 @@ namespace Waterly_iot_functions
     //inserts events from simulation to tables (by trigger)
     public static class Function1
     {
- 	[FunctionName("InsertEvent")]
+ 	[FunctionName("InsertEvent")] 
         public static async Task InsertEvent([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
         {
 
@@ -65,14 +65,14 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("get_devices_by_user_id")]
+        [FunctionName("get_devices_by_user_id")] //works
         public static IActionResult getDevicesOfUser(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "devices/userId={userId}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "waterly_devices",
                 ConnectionStringSetting = "CosmosDBConnection",
-                SqlQuery = "SELECT * FROM c WHERE c.userId = {userId}")]
+                SqlQuery = "SELECT * FROM c WHERE c.userId = {userId} AND c.status = true")]
                 IEnumerable<DeviceItem> devices,
                 ILogger log)
 
@@ -91,7 +91,7 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("get_comsumption_of_user")]
+        [FunctionName("get_comsumption_of_user")] //todo: take the year out of the request - still doesn't work
         public static async Task<IActionResult> getUserConsumption(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consumption_per_month/userId={userId}")] HttpRequest request,
         [CosmosDB(
@@ -160,13 +160,13 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("get_events_by_device_id")]
+        [FunctionName("get_events_by_device_id")] //todo- doesn't work
         public static IActionResult getEventsByDeviceId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/{device_id}")] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/device_id={deviceId}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
-                SqlQuery = "SELECT top 20 * FROM c WHERE c.id = {device_id} order by c.timestamp desc", //todo: remember to change here
+                SqlQuery = "SELECT top 20 * FROM c WHERE c.id = {deviceId} order by c.timestamp desc", //todo: remember to change here
                 ConnectionStringSetting = "CosmosDBConnection")]
                 IEnumerable<EventItem> events,
                 ILogger log)
@@ -184,14 +184,13 @@ namespace Waterly_iot_functions
         }
 
 
-        [FunctionName("update_bill_paid")]
+        [FunctionName("update_bill_paid")] //works
         public static async Task<IActionResult> updateBillPaid(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, //todo: make sure http request is right
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,//todo: make sure http request is right
                 ILogger log)
 
         {
-            string bill_id = "{bill_id}";
-
+       
             Container bills_container = Resources.cosmosClient.GetContainer("waterly_db", "bills_table");
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
@@ -202,7 +201,7 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            bill_to_pay.status = true;
+            bill_to_pay.status = true; //todo: make sure which is paid and which is unpaid
 
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id),
@@ -214,7 +213,7 @@ namespace Waterly_iot_functions
         }
 
 
-        [FunctionName("get_bills_by_user_id")]
+        [FunctionName("get_bills_by_user_id")] //works
         public static IActionResult getBillsByUserId(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "bills/userId={userId}")] HttpRequest request,
             [CosmosDB(
@@ -238,7 +237,7 @@ namespace Waterly_iot_functions
             return new OkObjectResult(bills_list);
         }
 
-        [FunctionName("get_alerts_by_user_id")]
+        [FunctionName("get_alerts_by_user_id")] //works
         public static IActionResult getAlertsByUserId(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "notifications/user_id={userId}")] HttpRequest request,
         [CosmosDB(
@@ -312,7 +311,7 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("create_device")]
+        [FunctionName("create_device")] //todo: need to add device registration
         public static async Task<IActionResult> createDevice(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{user_id}")] HttpRequest request, ILogger log) //route?
         {
@@ -326,18 +325,33 @@ namespace Waterly_iot_functions
             return new OkObjectResult(deviceJson);
         }
 
-        /*
-        [FunctionName("delete_device")]
-        public static async Task delete_device(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{device_id}")] HttpRequest request, ILogger log) //route?
+        
+        [FunctionName("delete_device")] //works
+        public static async Task<IActionResult> delete_device(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "devices/{device_id}")] HttpRequest request, string device_id, ILogger log) //
         {
-            Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
 
-            string device_id = "{device_id}";
+            var option = new FeedOptions { EnableCrossPartitionQuery = true };
 
-            //await devices_container.DeleteItemAsync(device_id);
+            DeviceItem device_to_delete = Resources.docClient.CreateDocumentQuery<DeviceItem>(
+                UriFactory.CreateDocumentCollectionUri("waterly_db", "waterly_devices"), option)
+                .Where(device_to_delete => device_to_delete.id.Equals(device_id))
+                .AsEnumerable()
+                .First();
+
+            //swipe boolean status
+            device_to_delete.status = false;
+
+
+            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
+                UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", device_to_delete.id),
+                device_to_delete);
+
+            var updated = response.Resource;
+
+            return new OkObjectResult(device_to_delete);
         }
-        */
+        
 
         [FunctionName("update_alert")]
         public static async Task<IActionResult> updateAlert(
@@ -375,6 +389,7 @@ namespace Waterly_iot_functions
             return new OkObjectResult(alert_to_update);
         }
 
+        //todo: add function update alert feedback
 
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
@@ -412,7 +427,7 @@ namespace Waterly_iot_functions
             }
         }
 
-
+        /*
         [FunctionName("edit_device_name")]
         public static async Task<IActionResult> EditDeviceName(
     [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "devices/{id}")] HttpRequest request, string id,
@@ -442,6 +457,7 @@ ILogger log)
 
             return new OkObjectResult(device_to_update);
         }
+        */
     }
 }
 
@@ -451,6 +467,5 @@ ILogger log)
 
 
 /*    
-    FETCH_DEVICE,,
-    EDIT_DEVICE,
+    FETCH_DEVICE,
     */
