@@ -39,7 +39,7 @@ export const setUser = (user) =>  (dispatch) => {
 }
 
 export const consumptionForYearEachMonth = (year) => {
-    return myUrl.get('/consumption_per_month/userId=${userId}');
+    return myUrl.get('/consumption_per_month/userId=${userId}')
 }
 
 export const fetchNotifications = () => async (dispatch, getState) => {
@@ -88,7 +88,7 @@ export const deleteDevice = (id) => async dispatch => {
 
 export const fetchEvents = (deviceId) => async (dispatch) => {
     //console.log(deviceId)
-    const response = await myUrl.get(`/events?device_id=${deviceId}`);
+    const response = await myUrl.get(`/events/device_id=${deviceId}`);
     //console.log(response)
     dispatch({type: FETCH_EVENTS, payload: response.data})
 };

@@ -91,7 +91,7 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("get_comsumption_of_user")]
+        [FunctionName("get_comsumption_of_user")] //todo: take the year out of the request
         public static async Task<IActionResult> getUserConsumption(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consumption_per_month/userId={userId}")] HttpRequest request,
         [CosmosDB(
@@ -162,7 +162,7 @@ namespace Waterly_iot_functions
 
         [FunctionName("get_events_by_device_id")]
         public static IActionResult getEventsByDeviceId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/{device_id}")] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/device_id={deviceId}")] HttpRequest request,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
@@ -202,7 +202,7 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            bill_to_pay.status = true;
+            bill_to_pay.status = true; //todo: make sure which is paid and which is unpaid
 
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id),
@@ -312,7 +312,7 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("create_device")]
+        [FunctionName("create_device")] //todo: need to add device registration
         public static async Task<IActionResult> createDevice(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{user_id}")] HttpRequest request, ILogger log) //route?
         {
@@ -375,6 +375,7 @@ namespace Waterly_iot_functions
             return new OkObjectResult(alert_to_update);
         }
 
+        //todo: add function update alert feedback
 
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
@@ -411,7 +412,7 @@ namespace Waterly_iot_functions
             }
         }
 
-
+        /*
         [FunctionName("edit_device_name")]
         public static async Task<IActionResult> EditDeviceName(
     [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "devices/{id}")] HttpRequest request, string id,
@@ -441,6 +442,7 @@ ILogger log)
 
             return new OkObjectResult(device_to_update);
         }
+        */
     }
 }
 
@@ -450,6 +452,5 @@ ILogger log)
 
 
 /*    
-    FETCH_DEVICE,,
-    EDIT_DEVICE,
+    FETCH_DEVICE,
     */

@@ -61,11 +61,7 @@ namespace Waterly_iot_functions
             long waterReadfirstEventInTheLastMonth = 0;
 
             DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
-<<<<<<< HEAD
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.id = {device_id} AND " +
-=======
             var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{device_id}' AND " +
->>>>>>> 04197073bce819583eb0d243efaa6e36494e0cf4
             $"c.timestamp > {((DateTimeOffset)startOfMonth).ToUnixTimeSeconds()} " +
             "order by c.timestamp";
 
