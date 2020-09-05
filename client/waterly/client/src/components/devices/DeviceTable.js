@@ -168,7 +168,7 @@ const DeviceTable = ({userId}) => {
                     }}
                     actions={[
                         rowData =>({
-                            icon: () => <Link style={{ color: '#000' }} to={`/events/device/${rowData.device_id}`}><EventIcon/></Link>,
+                            icon: () => <Link style={{ color: '#000' }} to={`/events/device/${rowData.id}`}><EventIcon/></Link>,
                             tooltip: "Device Events",
                         })
                     ]}
