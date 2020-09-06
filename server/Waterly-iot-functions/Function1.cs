@@ -18,6 +18,7 @@ using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
 using Bugsnag.Payload;
 using Microsoft.Azure.Cosmos.Linq;
+using System.IO;
 
 namespace Waterly_iot_functions
 {
@@ -353,6 +354,8 @@ namespace Waterly_iot_functions
         {
             string alert_id = notificationId;
 
+            string req_body = await new StreamReader(request.Body).ReadToEndAsync();
+            Notification data = JsonConvert.DeserializeObject<Notification>(req_body);
             Container alerts_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
