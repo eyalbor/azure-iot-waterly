@@ -13,7 +13,8 @@ class HomePage extends React.Component {
                         </h1>
                         <h3>Your Water Consumption Just Got Smarter.</h3>
                         {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
-                        <img alt="kineret" src="/kineret.png" className="ui medium centered image"/>
+                        <a href='http://kineret.org.il/miflasim/'><img  alt="kineret" src="/kineret.png" className="ui medium centered image"/></a>
+                        
                         <br/>
                     </div>
                 </div>
