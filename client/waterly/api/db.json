@@ -77,6 +77,7 @@
       "avg": 95.6
     }
   ],
+  
   "notifications": [
     {
       "id": 1,
@@ -85,7 +86,8 @@
       "type": "leakage",
       "message": "big problem",
       "device_id": "WaterlyIotDevice1",
-      "status": true
+      "status": true,
+      "feedback": true
     },
     {
       "id": 2,
@@ -94,7 +96,8 @@
       "type": "ph",
       "message": "water",
       "device_id": "WaterlyIotDevice1",
-      "status": true
+      "status": true,
+      "feedback": true
     }
   ],
   "devices": [
