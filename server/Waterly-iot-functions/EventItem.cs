@@ -20,6 +20,7 @@ namespace Waterly_iot_functions
         public string id { get; set; }
         public float ph { get; set; }
         public float pressure { get; set; }
+        public float salinity { get; set; }
     }
 
     public class DeviceItem
@@ -67,6 +68,7 @@ namespace Waterly_iot_functions
         public string message { get; set; }
         public bool status { get; set; }
         public bool feedback { get; set; }
+        public string evidence { get; set; }
     }
 
     public class MonthlyDeviceConsumptionItem
