@@ -226,43 +226,50 @@ namespace Waterly_iot_functions
             IEnumerable<BillItem> bills,
             ILogger log)
         {
-            if(bills.Count() > 0)
+            try
             {
-                string email = null;
-                string userID = bills.First().user_id;
-                var sqlQueryText = $"SELECT c.email FROM c WHERE c.id = {userID}";
-                QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-                Container UsersContainer = Resources.users_container;
-                FeedIterator<string> queryResultSetIterator = UsersContainer.GetItemQueryIterator<string>(queryDefinition );
-                List<string> emails = new List<string>();
-                while(queryResultSetIterator.HasMoreResults){
-                    Microsoft.Azure.Cosmos.FeedResponse<string> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                    email = currentResultSet.First();
-                    break;
-                }
-                if (email != null)
+                if (bills.Count() > 0)
                 {
-                    Container bills_container = Resources.bill_container;
-                    var option = new FeedOptions { EnableCrossPartitionQuery = true };
-                    BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
-                        UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
-                        .Where(bill_to_pay => bill_to_pay.id.Equals(bill_id))
-                        .AsEnumerable()
-                        .First();
+                    string email = null;
+                    string userID = bills.First().user_id;
+                    var sqlQueryText = $"SELECT c.email FROM c WHERE c.id = {userID}";
+                    QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+                    Container UsersContainer = Resources.users_container;
+                    FeedIterator<string> queryResultSetIterator = UsersContainer.GetItemQueryIterator<string>(queryDefinition);
+                    List<string> emails = new List<string>();
+                    Microsoft.Azure.Cosmos.FeedResponse<string> currentResultSet;
+                    while (queryResultSetIterator.HasMoreResults)
+                    {
+                        currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                        email = currentResultSet.First();
+                        break;
+                    }
+                    if (email != null)
+                    {
+                        Container bills_container = Resources.bill_container;
+                        var option = new FeedOptions { EnableCrossPartitionQuery = true };
+                        BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
+                            UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
+                            .Where(bill_to_pay => bill_to_pay.id.Equals(bill_id))
+                            .AsEnumerable()
+                            .First();
 
-                    ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
-                    UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id),bill_to_pay);
+                        ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
+                        UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id), bill_to_pay);
 
-                    var updated = response.Resource;
+                        var updated = response.Resource;
 
-                    WaterlyBillReq billReq = new WaterlyBillReq();
-                    billReq.email = email;
-                    billReq.task = "!";
-                    billReq.invoice = bill_id;
-                    billReq.amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses;
-                    //return pay(billReq);
+                        WaterlyBillReq billReq = new WaterlyBillReq();
+                        billReq.email = email;
+                        billReq.task = "!";
+                        billReq.invoice = bill_id;
+                        billReq.amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses;
+                        //return pay(billReq);
+                    }
+                    //return new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 }
-                //return new BadRequestObjectResult(HttpStatusCode.BadRequest);
+            } catch(Exception e){
+                log.LogInformation(e.Message);
             }
            
         }

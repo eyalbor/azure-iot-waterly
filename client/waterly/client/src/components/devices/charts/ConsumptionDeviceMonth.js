@@ -124,7 +124,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
       );
     }
     else {
-      return <div>Loading...</div>
+      return <div class="ui active centered inline loader"></div>
     }
   }
 }

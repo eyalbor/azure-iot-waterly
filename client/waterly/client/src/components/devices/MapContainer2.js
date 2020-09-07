@@ -30,7 +30,7 @@ export class MapContainer2 extends Component {
             return <div>Please signin</div>
         }
         if(!this.props.devices){
-            return <div>Loading...</div>
+            return <div class="ui active centered inline loader"></div>
         }
         return (
             <div>
