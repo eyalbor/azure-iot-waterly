@@ -22,6 +22,8 @@ import LastPage from '@material-ui/icons/LastPage';
 import Remove from '@material-ui/icons/Remove';
 import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import Alert from '@material-ui/lab/Alert';
 
@@ -43,6 +45,8 @@ const tableIcons = {
     ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
     CloseIcon: forwardRef((props, ref) => <CloseIcon {...props} ref={ref} />),
     DoneIcon: forwardRef((props, ref) => <DoneIcon {...props} ref={ref} />),
+    VisibilityIcon: forwardRef((props, ref) => <VisibilityIcon {...props} ref={ref} />),
+    VisibilityOffIcon: forwardRef((props, ref) => <VisibilityOffIcon {...props} ref={ref} />),
 };
 
 const columns = [
@@ -87,6 +91,13 @@ class NotificationsTable extends React.Component {
     submitNotification(row,status){
         let notification = cloneDeep(this.props.notifications[row.tableData.id])
         notification.status = status
+        delete notification.tableData
+        this.props.updateNotification(notification)
+    }
+
+    submitFeedbackNotification(row,feedback){
+        let notification = cloneDeep(this.props.notifications[row.tableData.id])
+        notification.feedback = feedback
         delete notification.tableData
         this.props.updateNotification(notification)
     }
@@ -136,7 +147,7 @@ class NotificationsTable extends React.Component {
                         }}
                         actions={[
                             rowData => ({
-                                icon: () => <CloseIcon/>,
+                                icon: () => <VisibilityIcon/>,
                                 tooltip: "Close",
                                 hidden: rowData.status===true,
                                 onClick: (event, rowData) => {
@@ -145,12 +156,30 @@ class NotificationsTable extends React.Component {
                                 }
                             }),
                             rowData => ({
-                                icon: () => <DoneIcon/>,
+                                icon: () => <VisibilityOffIcon/>,
                                 tooltip: "Open",
                                 hidden: rowData.status===false,
                                 onClick: (event, rowData) => {
                                     console.log("open " + rowData)
                                     this.submitNotification(rowData, false)
+                                }
+                            }),
+                            rowData => ({
+                                icon: () => <DoneIcon/>,
+                                tooltip: "Accured",
+                                hidden: rowData.feedback===true,
+                                onClick: (event, rowData) => {
+                                    console.log("Close " + rowData)
+                                    this.submitFeedbackNotification(rowData, true)
+                                }
+                            }),
+                            rowData => ({
+                                icon: () => <CloseIcon/>,
+                                tooltip: "Not Accured",
+                                hidden: rowData.feedback===false,
+                                onClick: (event, rowData) => {
+                                    console.log("open " + rowData)
+                                    this.submitFeedbackNotification(rowData, false)
                                 }
                             })
                         ]}

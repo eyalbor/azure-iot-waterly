@@ -86,9 +86,9 @@ class BillShow extends React.Component {
             return (     
                 <div className="ui card" key={bill.id} style={{padding: "10px", margin:"10px"}}>
                     <div className="content">
-                        <div className="header">Month {bill.month}/{bill.year}</div>
+                        <div className="header"> {bill.month} {bill.year}</div>
                         <div className="meta">
-                            Total flow for this month is: {bill.total_flow} m³/s
+                            Total flow: {bill.total_flow} m³/s
                             <br/>
                             Water expenses: {bill.water_expenses} ILS
                             <br/>
@@ -110,7 +110,7 @@ class BillShow extends React.Component {
                             height={300}
                             width={250}
                         />
-                        <Title text="Consumption per device [m³/s]">
+                        <Title text="Total Consumption [m³/s]">
                             <Font size="14"/>
                         </Title>
                         <CommonSeriesSettings
@@ -118,8 +118,8 @@ class BillShow extends React.Component {
                             type="bar"
                             ignoreEmptyPoints={true}
                             />
-                            <Series valueField="user" name="user"/>
-                            <Series valueField="avg" name="avg"/>
+                            <Series valueField="user" name="Your Consumption"/>
+                            <Series valueField="avg" name="Average Consumption"/>
                             <Legend verticalAlignment="bottom" horizontalAlignment="center" />
                         </Chart>
                     </div>
@@ -139,10 +139,10 @@ class BillShow extends React.Component {
                 </div>
 
                 <Modal isOpen={this.state.modal} toggle={this.toggle}>
-                    <ModalHeader toggle={this.toggle}>Paying Method</ModalHeader>
+                    <ModalHeader toggle={this.toggle}>Bill Payment</ModalHeader>
                     <ModalBody>
-                        The customer will choose how to pay the bill.<br/>
-                        Amount: {this.state.modal? this.state.bill.water_expenses+this.state.bill.fixed_expenses:''}
+                        You are about to pay your water bill.<br/>
+                        The total is {this.state.modal? this.state.bill.water_expenses+this.state.bill.fixed_expenses:''}
                     </ModalBody>
                     <ModalFooter>
                         <Button color="primary" onClick={() => this.pay(this.state.bill)}>Confirm</Button>{' '}

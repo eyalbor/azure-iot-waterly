@@ -16,6 +16,10 @@ using Microsoft.Azure.Documents;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
+using Bugsnag.Payload;
+using Microsoft.Azure.Cosmos.Linq;
+using System.IO;
+
 namespace Waterly_iot_functions
 {
 
@@ -116,25 +120,31 @@ namespace Waterly_iot_functions
                 Dictionary<string, long> userConsumptionPerMonthDict = new Dictionary<string, long>();
 
                 //Add avg per month
-                QueryDefinition bills_query = new QueryDefinition("SELECT top 1 avg FROM b WHERE b.month = @month_num").WithParameter("@month_num", month_num);
+                var sqlQueryText = $"SELECT TOP 1 avg FROM b WHERE b.month = {month_num}";
+                QueryDefinition bills_query = new QueryDefinition(sqlQueryText);
                 FeedIterator<long> bill_iterator = BillsContainer.GetItemQueryIterator<long>(bills_query);
 
 
                 Microsoft.Azure.Cosmos.FeedResponse<long> currentResultSet;
-
+                
                 long avg = 0;
+                
                 while (bill_iterator.HasMoreResults)
                 {
                     currentResultSet = await bill_iterator.ReadNextAsync();
                     avg = currentResultSet.First();
                     break;
                 } 
+                
                 userConsumptionPerMonthDict.Add("Average", avg);
-
+                
                 foreach (DeviceItem device_item in devices)
                 {
                     //calculate sum for month_num for device_item
-                    QueryDefinition consumption_query = new QueryDefinition("SELECT consumption_sum FROM c WHERE c.month = @month_num AND c.year = @year AND c.device_id = @device_id").WithParameter("@month_num", month_num).WithParameter("@year", DateTime.Today.Year).WithParameter("@device_id", device_item.id);
+                    int year = DateTime.Today.Year;
+                    string device_id = device_item.id;
+                    sqlQueryText = $"SELECT consumption_sum FROM c WHERE c.month = {month_num} AND c.year = {year} AND c.device_id = '{device_id}'";
+                    QueryDefinition consumption_query = new QueryDefinition(sqlQueryText);
                     FeedIterator<long> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<long>(consumption_query);
                     long consumption_per_device_month = 0;
                      
@@ -166,7 +176,7 @@ namespace Waterly_iot_functions
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
-                SqlQuery = "SELECT top 20 * FROM c WHERE c.id = {deviceId} order by c.timestamp desc", //todo: remember to change here
+                SqlQuery = "SELECT top 20 * FROM c WHERE c.device_id = {deviceId} order by c.timestamp desc", //todo: remember to change here
                 ConnectionStringSetting = "CosmosDBConnection")]
                 IEnumerable<EventItem> events,
                 ILogger log)
@@ -177,7 +187,6 @@ namespace Waterly_iot_functions
             log.LogInformation("http request for events of device id");
             foreach (EventItem event_item in events)
             {
-                log.LogInformation($"water_read is : {event_item.water_read}");
                 eventsList.Add(event_item);
             }
             return new OkObjectResult(eventsList);
@@ -309,22 +318,6 @@ namespace Waterly_iot_functions
             return new OkObjectResult(avgPressure / 10);
         }
 
-
-
-        [FunctionName("create_device")] //todo: need to add device registration
-        public static async Task<IActionResult> createDevice(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "devices/{user_id}")] HttpRequest request, ILogger log) //route?
-        {
-            Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
-
-
-            DeviceItem deviceJson = JsonConvert.DeserializeObject<DeviceItem>("check"); //check with eyal's client how it's sent
-
-            await devices_container.CreateItemAsync(deviceJson);
-
-            return new OkObjectResult(deviceJson);
-        }
-
         
         [FunctionName("delete_device")] //works
         public static async Task<IActionResult> delete_device(
@@ -353,7 +346,7 @@ namespace Waterly_iot_functions
         }
         
 
-        [FunctionName("update_alert")]
+        [FunctionName("update_alert")] //todo fix
         public static async Task<IActionResult> updateAlert(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notificationId}")] HttpRequest request, string notificationId,
         ILogger log)
@@ -361,6 +354,8 @@ namespace Waterly_iot_functions
         {
             string alert_id = notificationId;
 
+            string req_body = await new StreamReader(request.Body).ReadToEndAsync();
+            Notification data = JsonConvert.DeserializeObject<Notification>(req_body);
             Container alerts_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
@@ -371,15 +366,20 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            //swipe boolean status
-           if (alert_to_update.status == true)
+            bool status = false; //todo change
+            bool feedback = true; //todo change
+
+            if (alert_to_update.status != status)
             {
-                alert_to_update.status = false;
-            } else
-            {
-                alert_to_update.status = true;
+                alert_to_update.status = status;
             }
-            
+
+            if (alert_to_update.feedback != feedback)
+            {
+                alert_to_update.feedback = feedback;
+            }
+
+
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "alerts_table", alert_to_update.id),
                 alert_to_update);
@@ -388,8 +388,6 @@ namespace Waterly_iot_functions
 
             return new OkObjectResult(alert_to_update);
         }
-
-        //todo: add function update alert feedback
 
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
@@ -427,45 +425,6 @@ namespace Waterly_iot_functions
             }
         }
 
-        /*
-        [FunctionName("edit_device_name")]
-        public static async Task<IActionResult> EditDeviceName(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "devices/{id}")] HttpRequest request, string id,
-ILogger log)
 
-        {
-            string device_id = id;
-
-            Container devices_container = Resources.cosmosClient.GetContainer("waterly_db", "waterly_devices");
-
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-
-            DeviceItem device_to_update = Resources.docClient.CreateDocumentQuery<DeviceItem>(
-                UriFactory.CreateDocumentCollectionUri("waterly_db", "waterly_devices"), option)
-                .Where(device_to_update => device_to_update.id.Equals(device_id))
-                .AsEnumerable()
-                .First();
-
-            //device_to_update.name = request;
-
-
-            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
-                UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", device_to_update.id),
-                device_to_update);
-
-            var updated = response.Resource;
-
-            return new OkObjectResult(device_to_update);
-        }
-        */
     }
 }
-
-
-
-
-
-
-/*    
-    FETCH_DEVICE,
-    */

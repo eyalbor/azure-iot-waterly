@@ -6,14 +6,16 @@ class HomePage extends React.Component {
     render() {
         return (
             <div>
-                <div className="ui vertical  center aligned segment">
+                <div className="ui vertical masthead center aligned basic segment">
                     <div className="ui text container">
-                        <h2 className="ui violet header">
+                        <h1 className="ui violet header">
                             <b>Waterly</b>
-                        </h2>
-                        <h3>Keep your water safe.</h3>
+                        </h1>
+                        <h3>Your Water Consumption Just Got Smarter.</h3>
                         {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
-                        <img alt="kineret" src="/kineret.png" className="ui medium centered image"/>
+                        <a href='http://kineret.org.il/miflasim/'><img  alt="kineret" src="/kineret.png" className="ui medium centered image"/></a>
+                        
+                        <br/>
                     </div>
                 </div>
                 <Footer className="footer"/>
