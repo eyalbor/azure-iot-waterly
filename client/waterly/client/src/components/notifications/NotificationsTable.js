@@ -51,7 +51,7 @@ const tableIcons = {
 
 const columns = [
     {title: "Id", field: "device_id"},
-    {title: "Created", field: "timestamp", render: rowData => renderTime(rowData.timestamp)},
+    {title: "Created", field: "created_at", render: rowData => renderTime(rowData.created_at)},
     {title: "Type", field: "type"},
     {title: "Message", field: "message"},
 ]
@@ -127,7 +127,6 @@ class NotificationsTable extends React.Component {
                         columns={columns}
                         data={this.props.notifications}
                         icons={tableIcons}
-                        onRowClick={((evt) => this.state.setSelectedRow(this.state.selectedRow.tableData.id))}
                         options={{
                             sorting: true,
                             exportButton: true,
@@ -141,9 +140,6 @@ class NotificationsTable extends React.Component {
                                 fontSize: '16px',
                                 fontWeight: 'bold'
                             },
-                            rowStyle: rowData => ({
-                                backgroundColor: (this.state.selectedRow === rowData.tableData.id) ? '#EEE' : '#FFF'
-                            })
                         }}
                         actions={[
                             rowData => ({
