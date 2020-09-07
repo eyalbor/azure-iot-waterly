@@ -232,7 +232,7 @@ namespace Waterly_iot_functions
                 string userID = bills.First().user_id;
                 var sqlQueryText = $"SELECT c.email FROM c WHERE c.id = {userID}";
                 QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-                Container UsersContainer = Resources.cosmosClient.GetContainer("waterly_db", "users_table");
+                Container UsersContainer = Resources.users_container;
                 FeedIterator<string> queryResultSetIterator = UsersContainer.GetItemQueryIterator<string>(queryDefinition );
                 List<string> emails = new List<string>();
                 while(queryResultSetIterator.HasMoreResults){
@@ -242,7 +242,7 @@ namespace Waterly_iot_functions
                 }
                 if (email != null)
                 {
-                    Container bills_container = Resources.cosmosClient.GetContainer("waterly_db", "bills_table");
+                    Container bills_container = Resources.bill_container;
                     var option = new FeedOptions { EnableCrossPartitionQuery = true };
                     BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
                         UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
