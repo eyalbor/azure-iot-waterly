@@ -432,8 +432,8 @@ namespace Waterly_iot_functions
             string alert_id = notificationId;
 
             string req_body = await new StreamReader(request.Body).ReadToEndAsync();
-            Notification data = JsonConvert.DeserializeObject<Notification>(req_body);
-            Container alerts_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
+            AlertItem current_alert_data = JsonConvert.DeserializeObject<AlertItem>(req_body);
+            Container alerts_container = Resources.alert_container;
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
 
@@ -443,8 +443,8 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            bool status = false; //todo change
-            bool feedback = true; //todo change
+            bool status = current_alert_data.status; 
+            bool feedback = current_alert_data.feedback; 
 
             if (alert_to_update.status != status)
             {
