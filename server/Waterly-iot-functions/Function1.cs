@@ -106,35 +106,46 @@ namespace Waterly_iot_functions
                 ILogger log)
 
         {
-            Container BillsContainer = Resources.cosmosClient.GetContainer("waterly_db", "bill_table");
-            Container ConsumptionContainer = Resources.cosmosClient.GetContainer("waterly_db", "consumption_device_month");
+            Container BillsContainer = Resources.bill_container;
+            Container ConsumptionContainer = Resources.monthly_consumption_container;
 
 
             //for all year, dict for month number and dict userConsumptionPerMonthDict
-            Dictionary<int, Dictionary<string, long>> userConsumptionDict = new Dictionary<int, Dictionary<string, long>>();
+            List<Dictionary<string, long>> consumptions_months_list = new List<Dictionary<string, long>>();
 
-            for (int month_num = 1; month_num < 13; month_num++)
+            for (int month_num = 1; month_num < 13; month_num++) 
             {
                 //for each month, dict for device id and consumption sum
                 Dictionary<string, long> userConsumptionPerMonthDict = new Dictionary<string, long>();
 
+                userConsumptionPerMonthDict.Add("Month", month_num);
+
                 //Add avg per month
-                var sqlQueryText = $"SELECT TOP 1 avg FROM b WHERE b.month = {month_num}";
+                var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.month = {month_num}";
                 QueryDefinition bills_query = new QueryDefinition(sqlQueryText);
-                FeedIterator<long> bill_iterator = BillsContainer.GetItemQueryIterator<long>(bills_query);
+                FeedIterator<BillItem> bill_iterator = BillsContainer.GetItemQueryIterator<BillItem>(bills_query);
 
 
-                Microsoft.Azure.Cosmos.FeedResponse<long> currentResultSet;
-                
+                Microsoft.Azure.Cosmos.FeedResponse<BillItem> currentResultSet;
+
                 long avg = 0;
                 
                 while (bill_iterator.HasMoreResults)
                 {
                     currentResultSet = await bill_iterator.ReadNextAsync();
-                    avg = currentResultSet.First();
-                    break;
-                } 
-                
+                    if (currentResultSet.Count == 0)
+                    {
+                        break;
+                    } else
+                    {
+                        BillItem first_bill = currentResultSet.First();
+                        avg = (long)first_bill.avg;
+                        avg /= 10;
+                        break;
+                    }
+
+                }
+
                 userConsumptionPerMonthDict.Add("Average", avg);
                 
                 foreach (DeviceItem device_item in devices)
@@ -142,16 +153,25 @@ namespace Waterly_iot_functions
                     //calculate sum for month_num for device_item
                     int year = DateTime.Today.Year;
                     string device_id = device_item.id;
-                    sqlQueryText = $"SELECT consumption_sum FROM c WHERE c.month = {month_num} AND c.year = {year} AND c.device_id = '{device_id}'";
+                    sqlQueryText = $"SELECT * FROM c WHERE c.month = {month_num} AND c.year = {year} AND c.device_id = '{device_id}'";
                     QueryDefinition consumption_query = new QueryDefinition(sqlQueryText);
-                    FeedIterator<long> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<long>(consumption_query);
+                    FeedIterator<MonthlyDeviceConsumptionItem> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<MonthlyDeviceConsumptionItem>(consumption_query);
                     long consumption_per_device_month = 0;
-                     
+                    Microsoft.Azure.Cosmos.FeedResponse<MonthlyDeviceConsumptionItem> ConsumptionCurrentResultSet;
+
+
                     while (consumption_iterator.HasMoreResults)
                     {
-                        currentResultSet = await consumption_iterator.ReadNextAsync();
-                        consumption_per_device_month = currentResultSet.First();
-                        break;
+                        ConsumptionCurrentResultSet = await consumption_iterator.ReadNextAsync();
+                        if (ConsumptionCurrentResultSet.Count == 0)
+                        {
+                            break;
+                        } else
+                        {
+                            MonthlyDeviceConsumptionItem first_sum_item = ConsumptionCurrentResultSet.First();
+                            consumption_per_device_month = first_sum_item.consumption_sum / 1000000;
+                            break;
+                        }
                     }
 
 
@@ -159,10 +179,10 @@ namespace Waterly_iot_functions
                     userConsumptionPerMonthDict.Add(device_item.id, consumption_per_device_month);
                 }
 
-                userConsumptionDict.Add(month_num, userConsumptionPerMonthDict); 
+                consumptions_months_list.Add(userConsumptionPerMonthDict); 
             }
 
-            return new OkObjectResult(userConsumptionDict);
+            return new OkObjectResult(consumptions_months_list);
         }
 
             
