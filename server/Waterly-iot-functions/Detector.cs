@@ -4,6 +4,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Waterly_iot_functions
 {
@@ -12,7 +13,7 @@ namespace Waterly_iot_functions
 
         public static Container events_container = Resources.cosmosClient.GetContainer("waterly_db", "water_table");
         public static Container alert_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
-        public static String LEAKAGE = "Leakage";
+        public static String LEAKAGE = "Possible leakage";
         public static String ABNORMAL_PH_LEVEL = "Abnormal PH level";
         public static String ABNORMAL_PRESSURE_LEVEL = "Abnormal pressure level";
         private static ILogger logger;
@@ -57,11 +58,12 @@ namespace Waterly_iot_functions
 
             if (avgPH != 0)
             {
-                if (avgPH > 5 || avgPH < 3)
+                if (avgPH > 8 || avgPH < 6)
                 {
                     //There is abnormal PH level
-                    logger.LogInformation(ABNORMAL_PH_LEVEL + $" PH: {avgPH}");
-                    await suppressDetection(eventItem, ABNORMAL_PH_LEVEL, userId);
+                    string evidence = $"PH: {avgPH}";
+                    logger.LogInformation(ABNORMAL_PH_LEVEL + " , " + evidence);
+                    await suppressDetection(eventItem, ABNORMAL_PH_LEVEL, userId, evidence);
                 }
             }
         }
@@ -94,9 +96,10 @@ namespace Waterly_iot_functions
             {
                 if (avgPressure > 5 || avgPressure < 3)
                 {
-                    //There is a leak abnormal pressure level
-                    logger.LogInformation(ABNORMAL_PRESSURE_LEVEL + $" Pressure: {avgPressure}");
-                    await suppressDetection(eventItem, ABNORMAL_PRESSURE_LEVEL, userId);
+                    //There is abnormal pressure level
+                    string evidence = $"Pressure: {avgPressure}";
+                    logger.LogInformation(ABNORMAL_PRESSURE_LEVEL + " , " + evidence);
+                    await suppressDetection(eventItem, ABNORMAL_PRESSURE_LEVEL, userId, evidence);
                 }
             }
         }
@@ -155,15 +158,16 @@ namespace Waterly_iot_functions
                 if (lastDayConsumptionPerHour / lastWeekConsumptionPerHour > 1.5)
                 {
                     //There is a leak
-                    logger.LogInformation(LEAKAGE + $" waterRead24hours: {waterRead24HourAgo}, waterRead7DaysAgo: {waterRead7DaysAgo}");
-                    await suppressDetection(eventItem, LEAKAGE, userId);
+                    string evidence = $"waterRead24hours: {waterRead24HourAgo}, waterRead7DaysAgo: {waterRead7DaysAgo}";
+                    logger.LogInformation(LEAKAGE + " , " + evidence);
+                    await suppressDetection(eventItem, LEAKAGE, userId, evidence);
                 }
             }
         }
 
 
         // no more than one alert per week
-        public static async Task suppressDetection(EventItem eventItem, string type, string userId)
+        public static async Task suppressDetection(EventItem eventItem, string type, string userId, string evidence)
         {
             var now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 
@@ -191,13 +195,26 @@ namespace Waterly_iot_functions
                     return;
                 }                
             }
-            await createAlert(eventItem, type, userId);
+            await createAlert(eventItem, type, userId, evidence);
         }
 
 
-        public static async Task createAlert(EventItem eventItem, string type, string userId)
+        public static async Task createAlert(EventItem eventItem, string type, string userId, string evidence)
         {
             logger.LogInformation("Creating alert...");
+
+            var sqlQueryText = $"SELECT * FROM c WHERE c.userId = '{eventItem.device_id}'";
+            string device_name = null;
+
+            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+            FeedIterator<DeviceItem> queryResultSetIterator = Resources.devices_container.GetItemQueryIterator<DeviceItem>(queryDefinition);
+            FeedResponse<DeviceItem> currentResultSet;
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                DeviceItem device = currentResultSet.FirstOrDefault<DeviceItem>();
+                device_name = device.name;
+            }
 
             AlertItem alert = new AlertItem
             {
@@ -207,6 +224,8 @@ namespace Waterly_iot_functions
                 type = type,
                 user_id = userId,
                 status = false,
+                evidence = evidence,
+                device_name = device_name,
                 message = "Contact with technician"
             };
 
@@ -215,6 +234,7 @@ namespace Waterly_iot_functions
 
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
             Console.WriteLine("Created alert in database with id: {0}\n", alertResponse.Resource.id);
+
         }
     
     }
