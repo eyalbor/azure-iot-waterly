@@ -38,8 +38,8 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
     const devicesSources = new Set();
     const copyData = JSON.parse(JSON.stringify(data))
     copyData.map(obj => {
-      delete obj.month;
-      delete obj.average;
+      delete obj.Month;
+      delete obj.Average;
       let tuple = JSON.stringify(obj).split(',')
       tuple.map(obj2 => {
         //console.log(obj2)
@@ -59,7 +59,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
   componentDidMount(){
     consumptionForYearEachMonth(this.props.userId)
     .then(res=>{
-      console.log(res.data)
+      //console.log(res.data)
       this.prepareDataForChart(res.data)
     })
     .catch(err => {
@@ -79,7 +79,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
           ignoreEmptyPoints={true}
         >
           <CommonSeriesSettings
-            argumentField="month"
+            argumentField="Month"
             type="stackedBar"
           />
           {
@@ -88,9 +88,9 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
             })
           }
           <Series
-            axis="average"
+            axis="Average"
             type="spline"
-            valueField="average"
+            valueField="Average"
             name="Average"
             color="#008fd8"
           />
@@ -99,7 +99,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
             
           </ValueAxis>
           <ValueAxis
-            name="average"
+            name="Average"
             position="right"
             title="Average Consumption, m^3/s"
           >

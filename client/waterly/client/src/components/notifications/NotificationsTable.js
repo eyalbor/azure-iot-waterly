@@ -50,10 +50,11 @@ const tableIcons = {
 };
 
 const columns = [
-    {title: "Id", field: "device_id"},
-    {title: "Created", field: "created_at", render: rowData => renderTime(rowData.created_at)},
-    {title: "Type", field: "type"},
-    {title: "Message", field: "message"},
+    {title: "Id", field: "device_id", editable: 'never'},
+    {title: "Created",editable: 'never', field: "created_at", render: rowData => renderTime(rowData.created_at)},
+    {title: "Type", field: "type", editable: 'never'},
+    {title: "Message", field: "message",editable: 'never'},
+    {title: "Feedback", field: "feedback", lookup: { true: 'True', false: 'False'}, },
 ]
 
 class NotificationsTable extends React.Component {
@@ -126,6 +127,16 @@ class NotificationsTable extends React.Component {
                         title="My Alerts"
                         columns={columns}
                         data={this.props.notifications}
+                        cellEditable={{
+                            onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
+                                return new Promise((resolve, reject) => {
+                                    console.log('newValue: ' + newValue);
+                                    console.log(rowData);
+                                    this.submitFeedbackNotification(rowData,newValue)
+                                    setTimeout(resolve, 1000);
+                                });
+                            }
+                        }}
                         icons={tableIcons}
                         options={{
                             sorting: true,
@@ -143,7 +154,7 @@ class NotificationsTable extends React.Component {
                         }}
                         actions={[
                             rowData => ({
-                                icon: () => <VisibilityIcon/>,
+                                icon: () => <VisibilityOffIcon/>,
                                 tooltip: "Close",
                                 hidden: rowData.status===true,
                                 onClick: (event, rowData) => {
@@ -152,35 +163,17 @@ class NotificationsTable extends React.Component {
                                 }
                             }),
                             rowData => ({
-                                icon: () => <VisibilityOffIcon/>,
+                                icon: () => <VisibilityIcon />,
                                 tooltip: "Open",
                                 hidden: rowData.status===false,
                                 onClick: (event, rowData) => {
                                     console.log("open " + rowData)
                                     this.submitNotification(rowData, false)
                                 }
-                            }),
-                            rowData => ({
-                                icon: () => <DoneIcon/>,
-                                tooltip: "Accured",
-                                hidden: rowData.feedback===true,
-                                onClick: (event, rowData) => {
-                                    console.log("Close " + rowData)
-                                    this.submitFeedbackNotification(rowData, true)
-                                }
-                            }),
-                            rowData => ({
-                                icon: () => <CloseIcon/>,
-                                tooltip: "Not Accured",
-                                hidden: rowData.feedback===false,
-                                onClick: (event, rowData) => {
-                                    console.log("open " + rowData)
-                                    this.submitFeedbackNotification(rowData, false)
-                                }
                             })
                         ]}
                     />
-                </Grid>
+                    </Grid>
                 <Grid item xs={12}></Grid>
                 </Grid>
         );
