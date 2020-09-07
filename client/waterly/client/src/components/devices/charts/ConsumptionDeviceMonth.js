@@ -28,7 +28,7 @@ import { consumptionForYearEachMonth } from '../../../actions/index'
 export default class ConsumptionDeviceMonth extends React.PureComponent {
   constructor(props) {
     super(props);
-    console.log(props)
+    console.log("props" + props)
     this.state = {data: null, devices: null}
   }
 
@@ -59,7 +59,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
   componentDidMount(){
     consumptionForYearEachMonth(this.props.userId)
     .then(res=>{
-      //console.log(res.data)
+      console.log(res.data)
       this.prepareDataForChart(res.data)
     })
     .catch(err => {
