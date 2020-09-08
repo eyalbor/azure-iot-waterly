@@ -1,9 +1,7 @@
 using System;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Microsoft.Azure.WebJobs.Extensions.CosmosDB;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,17 +11,10 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents;
-using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
 using System.IO;
-using Microsoft.VisualBasic;
-using System.Collections.ObjectModel;
-using Microsoft.Azure.ServiceBus;
-using Bugsnag.Payload;
-using Microsoft.Azure.Cosmos.Linq;
-using System.Net.Http;
-using System.Net;
+
 
 namespace Waterly_iot_functions
 {
