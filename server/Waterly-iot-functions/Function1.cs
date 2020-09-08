@@ -22,7 +22,6 @@ using System.Collections.ObjectModel;
 using Microsoft.Azure.ServiceBus;
 using Bugsnag.Payload;
 using Microsoft.Azure.Cosmos.Linq;
-using System.IO;
 using System.Net.Http;
 using System.Net;
 
@@ -225,8 +224,10 @@ namespace Waterly_iot_functions
             ILogger log)
         {
 
-            //string req_body = await new StreamReader(request.Body).ReadToEndAsync();
-            //AlertItem current_alert_data = JsonConvert.DeserializeObject<AlertItem>(req_body);
+            string req_body = await new StreamReader(request.Body).ReadToEndAsync();
+            BillItem current_bill_data = JsonConvert.DeserializeObject<BillItem>(req_body);
+            string user_id = current_bill_data.user_id;
+
             Container bills_container = Resources.bill_container;
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
@@ -237,13 +238,43 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            bill_to_pay.status = false; //false = paid
+            bill_to_pay.status = true; //true = paid
 
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id),
                 bill_to_pay);
 
             var updated = response.Resource;
+
+            //get user's email address
+            Container UsersContainer = Resources.users_container;
+
+            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.id = '{user_id}'";
+            QueryDefinition users_query = new QueryDefinition(sqlQueryText);
+            FeedIterator<UserItem> users_iterator = UsersContainer.GetItemQueryIterator<UserItem>(users_query);
+
+
+            Microsoft.Azure.Cosmos.FeedResponse<UserItem> currentResultSet;
+
+            string email_address = "";
+
+            while (users_iterator.HasMoreResults)
+            {
+                currentResultSet = await users_iterator.ReadNextAsync();
+                if (currentResultSet.Count == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    UserItem first_user = currentResultSet.First();
+                    email_address = first_user.email;
+                    break;
+                }
+
+            }
+
+            //send mail
 
             return new OkObjectResult(bill_to_pay);
          }
@@ -295,16 +326,18 @@ namespace Waterly_iot_functions
 
                         var updated = response.Resource;
 
-                        WaterlyBillReq billReq = new WaterlyBillReq();
-                        billReq.email = email;
-                        billReq.task = "!";
-                        billReq.invoice = bill_id;
-                        billReq.amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses;
+                        //WaterlyBillReq billReq = new WaterlyBillReq
+                        //{
+                        //    email = email,
+                        //    task = "!",
+                        //    invoice = bill_id,
+                        //    amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses
+                        //};
                         //return pay(billReq);
                     }
                     //return new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 }
-            } catch(Exception e){
+            } catch(System.Exception e){
                 log.LogInformation(e.Message);
             }
            

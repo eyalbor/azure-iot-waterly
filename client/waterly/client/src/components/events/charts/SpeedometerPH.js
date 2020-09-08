@@ -9,7 +9,7 @@ const SpeedometerPH = props => {
         <h4 class="ui header">Current Avarege Ph</h4>
         <ReactSpeedometer
             maxValue={14}
-            width={400}
+            width={300}
             needleHeightRatio={0.6}
             value={props.avg}
             currentValueText={`Ph: ${props.avg}` }

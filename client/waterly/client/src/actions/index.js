@@ -8,6 +8,7 @@ import {
     FETCH_DEVICES,
     DELETE_DEVICE,
     EDIT_DEVICE,
+    QUALITY_DEVICE,
 
     FETCH_EVENTS,
 
@@ -109,8 +110,15 @@ export const fetchBills = () => async (dispatch, getState) => {
 
 export const payForBill = (bill) => async (dispatch) => {
     console.log('payForBill')   
-    const response = await myUrl.patch(`/bills/${bill.id}`);
+    const response = await myUrl.patch(`/bills/${bill.id}`, bill);
     console.log('payForBill')
     console.log(response)
     dispatch({type: PAY_BILL, payload: response.data})
+}
+
+export const quality = (device_id) => async (dispatch) => {
+    console.log('quality')   
+    const response = await myUrl.get(`/quality/device_id=${device_id}`);
+    console.log(response.data)
+    dispatch({type: QUALITY_DEVICE, payload: response.data})
 }
