@@ -28,7 +28,7 @@ import { consumptionForYearEachMonth } from '../../../actions/index'
 export default class ConsumptionDeviceMonth extends React.PureComponent {
   constructor(props) {
     super(props);
-    console.log(props)
+    console.log("props" + props)
     this.state = {data: null, devices: null}
   }
 
@@ -38,13 +38,13 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
     const devicesSources = new Set();
     const copyData = JSON.parse(JSON.stringify(data))
     copyData.map(obj => {
-      delete obj.month;
-      delete obj.average;
+      delete obj.Month;
+      delete obj.Average;
       let tuple = JSON.stringify(obj).split(',')
       tuple.map(obj2 => {
         //console.log(obj2)
         let array_tuple = (obj2).split(':')
-        console.log(array_tuple[0].replace('{',''))
+        //console.log(array_tuple[0].replace('{',''))
         devicesSources.add(JSON.parse(array_tuple[0].replace('{','')))
       })
       //let arr_tuple = JSON.stringify(tuple).split(':')
@@ -79,7 +79,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
           ignoreEmptyPoints={true}
         >
           <CommonSeriesSettings
-            argumentField="month"
+            argumentField="Month"
             type="stackedBar"
           />
           {
@@ -88,9 +88,9 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
             })
           }
           <Series
-            axis="average"
+            axis="Average"
             type="spline"
-            valueField="average"
+            valueField="Average"
             name="Average"
             color="#008fd8"
           />
@@ -99,7 +99,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
             
           </ValueAxis>
           <ValueAxis
-            name="average"
+            name="Average"
             position="right"
             title="Average Consumption, m^3/s"
           >
@@ -124,7 +124,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
       );
     }
     else {
-      return <div>Loading...</div>
+      return <div className="ui active centered inline loader"></div>
     }
   }
 }

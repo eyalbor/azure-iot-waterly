@@ -10,15 +10,17 @@ const position = { lng: 34.798248, lat: 32.115221 };
 export class MapContainer2 extends Component {
 
     componentDidMount(){
+        console.log("MapContainer2")
         this.props.fetchDevices()
     }
 
     displayMarkers(){
+        console.log(this.props.devices)
         return this.props.devices.map(device => {
             return (
-                <Marker key= {device.device_id} position={[device.lat, device.lng]}>
+                <Marker key= {device.id} position={[device.lat, device.lng]}>
                     <Popup>
-                        {device.device_id}
+                        {device.id}
                     </Popup>
                 </Marker>
             )
@@ -30,7 +32,7 @@ export class MapContainer2 extends Component {
             return <div>Please signin</div>
         }
         if(!this.props.devices){
-            return <div>Loading...</div>
+            return <div className="ui active centered inline loader"></div>
         }
         return (
             <div>

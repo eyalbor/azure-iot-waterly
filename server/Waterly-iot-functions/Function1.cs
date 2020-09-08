@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.Azure.WebJobs.Extensions.CosmosDB;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +13,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents;
+using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
 using System.IO;
@@ -18,6 +21,10 @@ using Microsoft.VisualBasic;
 using System.Collections.ObjectModel;
 using Microsoft.Azure.ServiceBus;
 using Bugsnag.Payload;
+using Microsoft.Azure.Cosmos.Linq;
+using System.IO;
+using System.Net.Http;
+using System.Net;
 
 namespace Waterly_iot_functions
 {
@@ -111,30 +118,41 @@ namespace Waterly_iot_functions
 
 
             //for all year, dict for month number and dict userConsumptionPerMonthDict
-            Dictionary<int, Dictionary<string, long>> userConsumptionDict = new Dictionary<int, Dictionary<string, long>>();
+            List<Dictionary<string, long>> consumptions_months_list = new List<Dictionary<string, long>>();
 
-            for (int month_num = 1; month_num < 13; month_num++)
+            for (int month_num = 1; month_num < 13; month_num++) 
             {
                 //for each month, dict for device id and consumption sum
                 Dictionary<string, long> userConsumptionPerMonthDict = new Dictionary<string, long>();
 
+                userConsumptionPerMonthDict.Add("Month", month_num);
+
                 //Add avg per month
-                var sqlQueryText = $"SELECT TOP 1 avg FROM b WHERE b.month = {month_num}";
+                var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.month = {month_num}";
                 QueryDefinition bills_query = new QueryDefinition(sqlQueryText);
-                FeedIterator<long> bill_iterator = BillsContainer.GetItemQueryIterator<long>(bills_query);
+                FeedIterator<BillItem> bill_iterator = BillsContainer.GetItemQueryIterator<BillItem>(bills_query);
 
 
-                Microsoft.Azure.Cosmos.FeedResponse<long> currentResultSet;
-                
+                Microsoft.Azure.Cosmos.FeedResponse<BillItem> currentResultSet;
+
                 long avg = 0;
                 
                 while (bill_iterator.HasMoreResults)
                 {
                     currentResultSet = await bill_iterator.ReadNextAsync();
-                    avg = currentResultSet.First();
-                    break;
-                } 
-                
+                    if (currentResultSet.Count == 0)
+                    {
+                        break;
+                    } else
+                    {
+                        BillItem first_bill = currentResultSet.First();
+                        avg = (long)first_bill.avg;
+                        avg /= 10;
+                        break;
+                    }
+
+                }
+
                 userConsumptionPerMonthDict.Add("Average", avg);
                 
                 foreach (DeviceItem device_item in devices)
@@ -142,16 +160,25 @@ namespace Waterly_iot_functions
                     //calculate sum for month_num for device_item
                     int year = DateTime.Today.Year;
                     string device_id = device_item.id;
-                    sqlQueryText = $"SELECT consumption_sum FROM c WHERE c.month = {month_num} AND c.year = {year} AND c.device_id = '{device_id}'";
+                    sqlQueryText = $"SELECT * FROM c WHERE c.month = {month_num} AND c.year = {year} AND c.device_id = '{device_id}'";
                     QueryDefinition consumption_query = new QueryDefinition(sqlQueryText);
-                    FeedIterator<long> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<long>(consumption_query);
+                    FeedIterator<MonthlyDeviceConsumptionItem> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<MonthlyDeviceConsumptionItem>(consumption_query);
                     long consumption_per_device_month = 0;
-                     
+                    Microsoft.Azure.Cosmos.FeedResponse<MonthlyDeviceConsumptionItem> ConsumptionCurrentResultSet;
+
+
                     while (consumption_iterator.HasMoreResults)
                     {
-                        currentResultSet = await consumption_iterator.ReadNextAsync();
-                        consumption_per_device_month = currentResultSet.First();
-                        break;
+                        ConsumptionCurrentResultSet = await consumption_iterator.ReadNextAsync();
+                        if (ConsumptionCurrentResultSet.Count == 0)
+                        {
+                            break;
+                        } else
+                        {
+                            MonthlyDeviceConsumptionItem first_sum_item = ConsumptionCurrentResultSet.First();
+                            consumption_per_device_month = first_sum_item.consumption_sum / 1000000;
+                            break;
+                        }
                     }
 
 
@@ -159,10 +186,10 @@ namespace Waterly_iot_functions
                     userConsumptionPerMonthDict.Add(device_item.id, consumption_per_device_month);
                 }
 
-                userConsumptionDict.Add(month_num, userConsumptionPerMonthDict); 
+                consumptions_months_list.Add(userConsumptionPerMonthDict); 
             }
 
-            return new OkObjectResult(userConsumptionDict);
+            return new OkObjectResult(consumptions_months_list);
         }
 
             
@@ -193,31 +220,93 @@ namespace Waterly_iot_functions
 
 
         [FunctionName("update_bill_paid")] //works
-        public static async Task<IActionResult> updateBillPaid(
+        public static async void updateBillPaid(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,//todo: make sure http request is right
-                ILogger log)
-
+            [CosmosDB(
+            databaseName: "waterly_db",
+            collectionName: "bills_table",
+            SqlQuery = "SELECT * FROM c WHERE c.id = {bill_id}", //todo: remember to change here
+            ConnectionStringSetting = "CosmosDBConnection")]
+            IEnumerable<BillItem> bills,
+            ILogger log)
         {
-       
-            Container bills_container = Resources.cosmosClient.GetContainer("waterly_db", "bills_table");
+            try
+            {
+                if (bills.Count() > 0)
+                {
+                    string email = null;
+                    string userID = bills.First().user_id;
+                    var sqlQueryText = $"SELECT c.email FROM c WHERE c.id = {userID}";
+                    QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+                    Container UsersContainer = Resources.users_container;
+                    FeedIterator<string> queryResultSetIterator = UsersContainer.GetItemQueryIterator<string>(queryDefinition);
+                    List<string> emails = new List<string>();
+                    Microsoft.Azure.Cosmos.FeedResponse<string> currentResultSet;
+                    while (queryResultSetIterator.HasMoreResults)
+                    {
+                        currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                        email = currentResultSet.First();
+                        break;
+                    }
+                    if (email != null)
+                    {
+                        Container bills_container = Resources.bill_container;
+                        var option = new FeedOptions { EnableCrossPartitionQuery = true };
+                        BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
+                            UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
+                            .Where(bill_to_pay => bill_to_pay.id.Equals(bill_id))
+                            .AsEnumerable()
+                            .First();
 
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
+                        ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
+                        UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id), bill_to_pay);
 
-            BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
-                UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
-                .Where(bill_to_pay => bill_to_pay.id.Equals(bill_id))
-                .AsEnumerable()
-                .First();
+                        var updated = response.Resource;
 
-            bill_to_pay.status = true; //todo: make sure which is paid and which is unpaid
+                        WaterlyBillReq billReq = new WaterlyBillReq();
+                        billReq.email = email;
+                        billReq.task = "!";
+                        billReq.invoice = bill_id;
+                        billReq.amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses;
+                        //return pay(billReq);
+                    }
+                    //return new BadRequestObjectResult(HttpStatusCode.BadRequest);
+                }
+            } catch(Exception e){
+                log.LogInformation(e.Message);
+            }
+           
+        }
 
-            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
-                UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id),
-                bill_to_pay);
+        private static async Task<IActionResult> pay(WaterlyBillReq billReq)
+        {
+            try
+            {
+                var jsonData = System.Text.Json.JsonSerializer.Serialize(billReq);
+                // requires using System.Net.Http;
+                var client = new HttpClient();
+              
+                HttpResponseMessage result = await client.PostAsync(
+                    // requires using System.Configuration;
+                    "https://prod-26.eastus.logic.azure.com:443/workflows/06a66aa325a84a29b64f788ff1537d50/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-f_3sTNheCjl7dSq3dZzCuqkYChEXDcweiK92DVv_KU",
+                    new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json"));
 
-            var updated = response.Resource;
+                var statusCode = result.StatusCode.ToString();
 
-            return new OkObjectResult(bill_to_pay);
+                if (statusCode != "200")
+                {
+                    return new BadRequestObjectResult(statusCode);
+                }
+                else
+                {
+                    return new OkObjectResult(statusCode);
+                }
+            }
+            catch (System.Exception e)
+            {
+                return new BadRequestObjectResult(e.Message);
+            }
+
         }
 
 
@@ -336,8 +425,8 @@ namespace Waterly_iot_functions
             string alert_id = notificationId;
 
             string req_body = await new StreamReader(request.Body).ReadToEndAsync();
-            Notification data = JsonConvert.DeserializeObject<Notification>(req_body);
-            Container alerts_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
+            AlertItem current_alert_data = JsonConvert.DeserializeObject<AlertItem>(req_body);
+            Container alerts_container = Resources.alert_container;
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
 
@@ -347,8 +436,8 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            bool status = false; //todo change
-            bool feedback = true; //todo change
+            bool status = current_alert_data.status; 
+            string feedback = current_alert_data.feedback; 
 
             if (alert_to_update.status != status)
             {

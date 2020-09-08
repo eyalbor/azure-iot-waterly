@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import EventsTable from './EventTable'
 import ScatterEvents from './charts/ScatterEvents'
 import { fetchEvents } from '../../actions/index'
+import SpeedometerPH from './charts/SpeedometerPH'
+import SpeedometerPressure from './charts/SpeedometerPressure'
 
 class EventsList extends React.Component {
 
@@ -28,6 +30,17 @@ class EventsList extends React.Component {
             <div className="ui container">
                 <h3>Device <u>{this.props.deviceId}</u> Events</h3>
                 {this.renderList()}
+                <br/>
+                <div className="ui relaxed centered grid container">
+                    <div class="two column centered row">
+                        <div className="column">
+                            <SpeedometerPH avg={7}/>    
+                        </div>
+                        <div className="column">
+                            <SpeedometerPressure avg={4.3}/>
+                        </div>
+                    </div>
+                </div>
                 <br/>
                 <ScatterEvents data={this.props.events}/>
                 <br/>

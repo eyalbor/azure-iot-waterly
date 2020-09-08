@@ -15,7 +15,7 @@ class DeviceEdit extends React.Component {
 
     render(){
         if(!this.props.device){
-            return <div>Loading...</div>
+            return <div className="ui active centered inline loader"></div>
         }
         return (
             <div className="ui container">

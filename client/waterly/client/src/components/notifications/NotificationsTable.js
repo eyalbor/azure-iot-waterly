@@ -49,11 +49,24 @@ const tableIcons = {
     VisibilityOffIcon: forwardRef((props, ref) => <VisibilityOffIcon {...props} ref={ref} />),
 };
 
+function renderFeedback(feedback){
+    console.log(feedback.toLowerCase().trim())
+    switch(feedback.toLowerCase().trim()){
+        case "true": case "yes": case "1": return 'True';
+        case "false": case "no": case "0": return 'False';
+        case "none": case 'null': return 'None'
+        default: return Boolean(feedback);
+    }
+}
+
 const columns = [
-    {title: "Id", field: "device_id"},
-    {title: "Created", field: "timestamp", render: rowData => renderTime(rowData.timestamp)},
-    {title: "Type", field: "type"},
-    {title: "Message", field: "message"},
+    {title: "Id", field: "device_id", editable: 'never'},
+    {title: "Created",editable: 'never', field: "created_at", render: rowData => renderTime(rowData.created_at)},
+    {title: "Type", field: "type", editable: 'never'},
+    {title: "Message", field: "message",editable: 'never'},
+    {title: "Feedback", field: "feedback", lookup: { true: 'True', false: 'False',  null: 'None'},
+        render: rowData => renderFeedback(rowData.feedback)
+    },
 ]
 
 class NotificationsTable extends React.Component {
@@ -107,7 +120,7 @@ class NotificationsTable extends React.Component {
             return <div>Please signin</div>
         }
         if(!this.props.notifications){
-            return <div>Loading...</div>
+            return <div className="ui active centered inline loader"></div>
         }
         return (
             <Grid container>
@@ -126,8 +139,17 @@ class NotificationsTable extends React.Component {
                         title="My Alerts"
                         columns={columns}
                         data={this.props.notifications}
+                        cellEditable={{
+                            onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
+                                return new Promise((resolve, reject) => {
+                                    console.log('newValue: ' + newValue);
+                                    console.log(rowData);
+                                    this.submitFeedbackNotification(rowData,newValue)
+                                    setTimeout(resolve, 1000);
+                                });
+                            }
+                        }}
                         icons={tableIcons}
-                        onRowClick={((evt) => this.state.setSelectedRow(this.state.selectedRow.tableData.id))}
                         options={{
                             sorting: true,
                             exportButton: true,
@@ -141,13 +163,10 @@ class NotificationsTable extends React.Component {
                                 fontSize: '16px',
                                 fontWeight: 'bold'
                             },
-                            rowStyle: rowData => ({
-                                backgroundColor: (this.state.selectedRow === rowData.tableData.id) ? '#EEE' : '#FFF'
-                            })
                         }}
                         actions={[
                             rowData => ({
-                                icon: () => <VisibilityIcon/>,
+                                icon: () => <VisibilityOffIcon/>,
                                 tooltip: "Close",
                                 hidden: rowData.status===true,
                                 onClick: (event, rowData) => {
@@ -156,35 +175,17 @@ class NotificationsTable extends React.Component {
                                 }
                             }),
                             rowData => ({
-                                icon: () => <VisibilityOffIcon/>,
+                                icon: () => <VisibilityIcon />,
                                 tooltip: "Open",
                                 hidden: rowData.status===false,
                                 onClick: (event, rowData) => {
                                     console.log("open " + rowData)
                                     this.submitNotification(rowData, false)
                                 }
-                            }),
-                            rowData => ({
-                                icon: () => <DoneIcon/>,
-                                tooltip: "Accured",
-                                hidden: rowData.feedback===true,
-                                onClick: (event, rowData) => {
-                                    console.log("Close " + rowData)
-                                    this.submitFeedbackNotification(rowData, true)
-                                }
-                            }),
-                            rowData => ({
-                                icon: () => <CloseIcon/>,
-                                tooltip: "Not Accured",
-                                hidden: rowData.feedback===false,
-                                onClick: (event, rowData) => {
-                                    console.log("open " + rowData)
-                                    this.submitFeedbackNotification(rowData, false)
-                                }
                             })
                         ]}
                     />
-                </Grid>
+                    </Grid>
                 <Grid item xs={12}></Grid>
                 </Grid>
         );
