@@ -1,9 +1,7 @@
 using System;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Microsoft.Azure.WebJobs.Extensions.CosmosDB;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,12 +11,13 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents;
-using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Cosmos;
-using Bugsnag.Payload;
-using Microsoft.Azure.Cosmos.Linq;
 using System.IO;
+using Microsoft.VisualBasic;
+using System.Collections.ObjectModel;
+using Microsoft.Azure.ServiceBus;
+using Bugsnag.Payload;
 
 namespace Waterly_iot_functions
 {
@@ -107,8 +106,8 @@ namespace Waterly_iot_functions
                 ILogger log)
 
         {
-            Container BillsContainer = Resources.cosmosClient.GetContainer("waterly_db", "bill_table");
-            Container ConsumptionContainer = Resources.cosmosClient.GetContainer("waterly_db", "consumption_device_month");
+            Container BillsContainer = Resources.bill_container;
+            Container ConsumptionContainer = Resources.monthly_consumption_container;
 
 
             //for all year, dict for month number and dict userConsumptionPerMonthDict
@@ -271,51 +270,33 @@ namespace Waterly_iot_functions
         }
 
 
-        [FunctionName("get_ph_by_device_id")]
-        public static IActionResult getPhByUserId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ph/{device_id}")] HttpRequest request, //todo: eyal - we changed the route
+        [FunctionName("get_water_quality_by_device_id")]
+        public static IActionResult getWaterQualityByDeviceId(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "quality/device_id={device_id}")] HttpRequest request, //todo: eyal - we changed the route
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
                 ConnectionStringSetting = "CosmosDBConnection",
-                SqlQuery = "SELECT TOP 10 * FROM c WHERE c.id = '{device_id}' order by c.timestamp DESC")]
+                SqlQuery = "SELECT TOP 10 * FROM c WHERE c.device_id = {device_id} order by c.timestamp DESC")]
                 IEnumerable<EventItem> events,
                 ILogger log)
 
         {
-
+            int numOfSamples = Resources.numOfSamples;
             float avgPh = 0;
+            float avgPressure = 0;
+            float avgSalinity = 0;
 
-            log.LogInformation("http request for avg ph of device id");
+            log.LogInformation("http request for avg ph, pressure and salinity of device id");
             foreach (EventItem item in events)
             {
                 avgPh += item.ph;
-            }
-            return new OkObjectResult(avgPh / 10);
-        }
-
-
-        [FunctionName("get_pressure_by_device_id")]
-        public static IActionResult getPressureByUserId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pressure/{device_id}")] HttpRequest request, //todo: eyal - we changed the route
-            [CosmosDB(
-                        databaseName: "waterly_db",
-                        collectionName: "water_table",
-                        ConnectionStringSetting = "CosmosDBConnection",
-                        SqlQuery = "SELECT TOP 10 * FROM c WHERE c.id = '{device_id}' order by c.timestamp DESC")]
-                        IEnumerable<EventItem> events,
-                ILogger log)
-
-        {
-
-            float avgPressure = 0;
-
-            log.LogInformation("http request for avg pressure of device id");
-            foreach (EventItem item in events)
-            {
                 avgPressure += item.pressure;
+                avgSalinity += item.salinity;
             }
-            return new OkObjectResult(avgPressure / 10);
+            Dictionary<string, float> qualityDict = new Dictionary<string, float> {
+                {"ph", avgPh/numOfSamples}, {"pressure", avgPressure/numOfSamples}, {"salinity", avgSalinity/numOfSamples} };
+            return new OkObjectResult(JsonConvert.SerializeObject(qualityDict));
         }
 
         
@@ -392,7 +373,7 @@ namespace Waterly_iot_functions
         // Function is called every month on the 10th at 9 AM.
         [FunctionName("create_bills_for_all_users")]
         public static async Task createBill(
-            [TimerTrigger("0 0 9 * * *")]TimerInfo myTimer,
+            [TimerTrigger("0 0 9 10 * *")]TimerInfo myTimer,
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "users_table",

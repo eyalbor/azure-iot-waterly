@@ -36,7 +36,7 @@ namespace Waterly_iot_functions
         public static async Task detectPHLevel(EventItem eventItem, string userId)
         {
             float avgPH = 0;
-            int numOfSamples = 10;
+            int numOfSamples = Resources.numOfSamples;
             var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = '{eventItem.device_id}' " +
                     "order by c.timestamp DESC";
 
@@ -71,7 +71,7 @@ namespace Waterly_iot_functions
 
         public static async Task detectPressureLevel(EventItem eventItem, string userId)
         {
-            int numOfSamples = 10;
+            int numOfSamples = Resources.numOfSamples;
             var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = '{eventItem.device_id}'" +
                     "order by c.timestamp DESC";
             float avgPressure = 0;
@@ -203,7 +203,7 @@ namespace Waterly_iot_functions
         {
             logger.LogInformation("Creating alert...");
 
-            var sqlQueryText = $"SELECT * FROM c WHERE c.userId = '{eventItem.device_id}'";
+            var sqlQueryText = $"SELECT * FROM c WHERE c.id = '{eventItem.device_id}'";
             string device_name = null;
 
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);

@@ -83,6 +83,15 @@ namespace Waterly_iot_functions
         public long first_water_read { get; set; }
 
     }
+
+    public class WaterlyBillReq
+    {
+        public string email { get; set; }
+        public string invoice { get; set; }
+        public float amount { get; set; }
+        public string task { get; set; }
+    }
+
 }
 
 

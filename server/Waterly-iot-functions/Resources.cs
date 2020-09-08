@@ -15,5 +15,6 @@ namespace Waterly_iot_functions
         public static Container monthly_consumption_container = cosmosClient.GetContainer("waterly_db", "consumption_device_month");
         public static Container alert_container = cosmosClient.GetContainer("waterly_db", "alerts_table");
         public static Container users_container = cosmosClient.GetContainer("waterly_db", "users_table");
+        public const int numOfSamples = 10;
     }
 }
