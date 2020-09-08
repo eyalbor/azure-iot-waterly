@@ -22,7 +22,6 @@ using System.Collections.ObjectModel;
 using Microsoft.Azure.ServiceBus;
 using Bugsnag.Payload;
 using Microsoft.Azure.Cosmos.Linq;
-using System.IO;
 using System.Net.Http;
 using System.Net;
 
@@ -327,16 +326,18 @@ namespace Waterly_iot_functions
 
                         var updated = response.Resource;
 
-                        WaterlyBillReq billReq = new WaterlyBillReq();
-                        billReq.email = email;
-                        billReq.task = "!";
-                        billReq.invoice = bill_id;
-                        billReq.amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses;
+                        //WaterlyBillReq billReq = new WaterlyBillReq
+                        //{
+                        //    email = email,
+                        //    task = "!",
+                        //    invoice = bill_id,
+                        //    amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses
+                        //};
                         //return pay(billReq);
                     }
                     //return new BadRequestObjectResult(HttpStatusCode.BadRequest);
                 }
-            } catch(Exception e){
+            } catch(System.Exception e){
                 log.LogInformation(e.Message);
             }
            
