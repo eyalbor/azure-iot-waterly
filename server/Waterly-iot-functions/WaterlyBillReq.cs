@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+/*
 namespace Waterly_iot_functions
 {
     class WaterlyBillReq
@@ -12,3 +12,4 @@ namespace Waterly_iot_functions
         public string task { get; set; }
     }
 }
+*/

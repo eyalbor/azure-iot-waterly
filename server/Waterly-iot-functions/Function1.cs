@@ -220,6 +220,38 @@ namespace Waterly_iot_functions
 
 
         [FunctionName("update_bill_paid")] //works
+        public static async Task<IActionResult> updateBillPaid(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,
+            ILogger log)
+        {
+
+            //string req_body = await new StreamReader(request.Body).ReadToEndAsync();
+            //AlertItem current_alert_data = JsonConvert.DeserializeObject<AlertItem>(req_body);
+            Container bills_container = Resources.bill_container;
+
+            var option = new FeedOptions { EnableCrossPartitionQuery = true };
+
+            BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
+                UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
+                .Where(bill_to_pay => bill_to_pay.id.Equals(bill_id))
+                .AsEnumerable()
+                .First();
+
+            bill_to_pay.status = false; //false = paid
+
+            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
+                UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id),
+                bill_to_pay);
+
+            var updated = response.Resource;
+
+            return new OkObjectResult(bill_to_pay);
+         }
+
+
+
+        /*
+        [FunctionName("update_bill_paid")] //works
         public static async void updateBillPaid(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,//todo: make sure http request is right
             [CosmosDB(
@@ -308,6 +340,7 @@ namespace Waterly_iot_functions
             }
 
         }
+        */
 
 
         [FunctionName("get_bills_by_user_id")] //works
