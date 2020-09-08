@@ -61,7 +61,7 @@ export class MapContainer extends Component {
         return <div>Please signin</div>
     }
     if(!this.props.devices){
-        return <div class="ui active centered inline loader"></div>
+        return <div className="ui active centered inline loader"></div>
     }
     return (
       <Map

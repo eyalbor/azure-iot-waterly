@@ -44,7 +44,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
       tuple.map(obj2 => {
         //console.log(obj2)
         let array_tuple = (obj2).split(':')
-        console.log(array_tuple[0].replace('{',''))
+        //console.log(array_tuple[0].replace('{',''))
         devicesSources.add(JSON.parse(array_tuple[0].replace('{','')))
       })
       //let arr_tuple = JSON.stringify(tuple).split(':')
@@ -124,7 +124,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
       );
     }
     else {
-      return <div class="ui active centered inline loader"></div>
+      return <div className="ui active centered inline loader"></div>
     }
   }
 }
