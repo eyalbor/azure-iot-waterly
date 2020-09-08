@@ -235,6 +235,8 @@ namespace Waterly_iot_functions
             // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse.
             Console.WriteLine("Created alert in database with id: {0}\n", alertResponse.Resource.id);
 
+            EmailSender.sendMailNewAlert(alert, userId);
+
         }
     
     }
