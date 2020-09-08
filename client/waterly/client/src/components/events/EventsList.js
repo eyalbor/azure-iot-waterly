@@ -14,43 +14,36 @@ class EventsList extends React.Component {
         this.props.quality(this.props.deviceId);
     }
 
-    renderList(){
-        if(this.props.isSignedIn) {
-            //console.log(this.props.currentUserId)
-            //this.props.fetchDevices(this.props.currentUserId);
-            return (
-               <EventsTable data={this.props.events} deviceId={this.props.deviceId}/>
-            );
-        } else {
-            return <h3>Please sign in</h3>
-        }
-       
-    }
-
     render(){
-        return (
-            <div className="ui container">
-                <h3>Device <u>{this.props.deviceId}</u> Events</h3>
-                {this.renderList()}
-                <br/>
-                <div className="ui relaxed centered grid container">
-                    <div class="three column centered row">
-                        <div className="column">
-                        {this.props.device_quality.ph!=null?<SpeedometerPH avg={this.props.device_quality.ph.toFixed(1)}/>:null}    
-                        </div>
-                        <div className="column">
-                            {this.props.device_quality.pressure!=null?<SpeedometerPressure avg={this.props.device_quality.pressure.toFixed(1)}/>:null}
-                        </div>
-                        <div className="column">
-                            {this.props.device_quality.pressure!=null?<SpeedometerSalinity avg={this.props.device_quality.salinity.toFixed(1)}/>:null}
+        if(this.props.isSignedIn)
+        {
+            return (
+                <div className="ui container">
+                    <h3>Device <u>{this.props.deviceId}</u> Events</h3>
+                    <EventsTable data={this.props.events} deviceId={this.props.deviceId}/>
+                    <br/>
+                    <div className="ui relaxed centered grid container">
+                        <div class="three column centered row">
+                            <div className="column">
+                            {this.props.device_quality.ph!=null?<SpeedometerPH avg={this.props.device_quality.ph.toFixed(1)}/>:null}    
+                            </div>
+                            <div className="column">
+                                {this.props.device_quality.pressure!=null?<SpeedometerPressure avg={this.props.device_quality.pressure.toFixed(1)}/>:null}
+                            </div>
+                            <div className="column">
+                                {this.props.device_quality.pressure!=null?<SpeedometerSalinity avg={this.props.device_quality.salinity.toFixed(1)}/>:null}
+                            </div>
                         </div>
                     </div>
+                    <br/>
+                    <ScatterEvents data={this.props.events}/>
+                    <br/>
                 </div>
-                <br/>
-                <ScatterEvents data={this.props.events}/>
-                <br/>
-            </div>
-        );
+            );
+        }
+        else{
+            return <h3>Please sign in</h3>
+        }
     }
 };
 
