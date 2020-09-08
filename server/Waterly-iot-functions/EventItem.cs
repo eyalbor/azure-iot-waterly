@@ -67,7 +67,7 @@ namespace Waterly_iot_functions
         public long created_at { get; set; }
         public string message { get; set; }
         public bool status { get; set; }
-        public bool feedback { get; set; }
+        public string feedback { get; set; }
         public string evidence { get; set; }
     }
 

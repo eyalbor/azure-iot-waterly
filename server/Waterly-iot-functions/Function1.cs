@@ -451,7 +451,7 @@ namespace Waterly_iot_functions
                 .First();
 
             bool status = current_alert_data.status; 
-            bool feedback = current_alert_data.feedback; 
+            string feedback = current_alert_data.feedback; 
 
             if (alert_to_update.status != status)
             {

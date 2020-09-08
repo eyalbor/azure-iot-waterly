@@ -49,12 +49,24 @@ const tableIcons = {
     VisibilityOffIcon: forwardRef((props, ref) => <VisibilityOffIcon {...props} ref={ref} />),
 };
 
+function renderFeedback(feedback){
+    console.log(feedback.toLowerCase().trim())
+    switch(feedback.toLowerCase().trim()){
+        case "true": case "yes": case "1": return 'True';
+        case "false": case "no": case "0": return 'False';
+        case "none": case 'null': return 'None'
+        default: return Boolean(feedback);
+    }
+}
+
 const columns = [
     {title: "Id", field: "device_id", editable: 'never'},
     {title: "Created",editable: 'never', field: "created_at", render: rowData => renderTime(rowData.created_at)},
     {title: "Type", field: "type", editable: 'never'},
     {title: "Message", field: "message",editable: 'never'},
-    {title: "Feedback", field: "feedback", lookup: { true: 'True', false: 'False'}, },
+    {title: "Feedback", field: "feedback", lookup: { true: 'True', false: 'False',  null: 'None'},
+        render: rowData => renderFeedback(rowData.feedback)
+    },
 ]
 
 class NotificationsTable extends React.Component {
