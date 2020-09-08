@@ -109,7 +109,7 @@ export const fetchBills = () => async (dispatch, getState) => {
 
 export const payForBill = (bill) => async (dispatch) => {
     console.log('payForBill')   
-    const response = await myUrl.patch(`/bills/${bill.id}`);
+    const response = await myUrl.patch(`/bills/${bill.id}`, bill);
     console.log('payForBill')
     console.log(response)
     dispatch({type: PAY_BILL, payload: response.data})

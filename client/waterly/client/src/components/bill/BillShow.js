@@ -82,6 +82,9 @@ class BillShow extends React.Component {
 
     renderCards(){
         //console.log(this.props.bills)
+        this.props.bills.sort(function(a,b){
+            return a.month-b.month
+        })
         return this.props.bills.map(bill => {
             return (     
                 <div className="ui card" key={bill.id} style={{padding: "10px", margin:"10px"}}>
