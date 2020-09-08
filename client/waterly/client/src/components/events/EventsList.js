@@ -5,6 +5,7 @@ import ScatterEvents from './charts/ScatterEvents'
 import { fetchEvents, quality } from '../../actions/index'
 import SpeedometerPH from './charts/SpeedometerPH'
 import SpeedometerPressure from './charts/SpeedometerPressure'
+import SpeedometerSalinity from './charts/SpeedometerSalinity'
 
 class EventsList extends React.Component {
 
@@ -33,12 +34,15 @@ class EventsList extends React.Component {
                 {this.renderList()}
                 <br/>
                 <div className="ui relaxed centered grid container">
-                    <div class="two column centered row">
+                    <div class="three column centered row">
                         <div className="column">
-                            <SpeedometerPH avg={7}/>    
+                        {this.props.device_quality.ph!=null?<SpeedometerPH avg={this.props.device_quality.ph.toFixed(1)}/>:null}    
                         </div>
                         <div className="column">
-                            <SpeedometerPressure avg={4.3}/>
+                            {this.props.device_quality.pressure!=null?<SpeedometerPressure avg={this.props.device_quality.pressure.toFixed(1)}/>:null}
+                        </div>
+                        <div className="column">
+                            {this.props.device_quality.pressure!=null?<SpeedometerSalinity avg={this.props.device_quality.salinity.toFixed(1)}/>:null}
                         </div>
                     </div>
                 </div>

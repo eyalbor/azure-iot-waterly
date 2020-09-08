@@ -1,22 +1,21 @@
 import React from 'react'
 import ReactSpeedometer from "react-d3-speedometer"
-import Paper from '@material-ui/core/Paper';
 
-const SpeedometerPressure = props => {
+const SpeedometerSalinity = props => {
     return (
     <div className="ui center aligned compact segment">
-        <h4 class="ui header">Current Avarege Pressure</h4>
+        <h4 class="ui header">Current Avarege Salinity</h4>
         <ReactSpeedometer
-            maxValue={7}
-            minValue={1}
+            maxValue={2500}
+            minValue={0}
             width={300}
             needleHeightRatio={0.6}
             value={props.avg}
-            currentValueText={`Pressure: ${props.avg} atm` }
+            currentValueText={`Salinity : ${props.avg} mg/L` }
             segments={6}
-            customSegmentStops={[1,2,3,4,5,6,7]}
-            startColor="green"
-            endColor="blue"
+            customSegmentStops={[0,100,250,400,2500]}
+            startColor="blue"
+            endColor="#e6e600"
             ringWidth={47}
             needleTransitionDuration={3333}
             needleTransition="easeElastic"
@@ -26,4 +25,4 @@ const SpeedometerPressure = props => {
     )
 }
 
-export default SpeedometerPressure;
+export default SpeedometerSalinity;

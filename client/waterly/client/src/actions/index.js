@@ -118,7 +118,7 @@ export const payForBill = (bill) => async (dispatch) => {
 
 export const quality = (device_id) => async (dispatch) => {
     console.log('quality')   
-    const response = await myUrl.patch(`/quality/device_id=${device_id}`);
-    console.log(response)
+    const response = await myUrl.get(`/quality/device_id=${device_id}`);
+    console.log(response.data)
     dispatch({type: QUALITY_DEVICE, payload: response.data})
 }
