@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import EventsTable from './EventTable'
 import ScatterEvents from './charts/ScatterEvents'
-import { fetchEvents } from '../../actions/index'
+import { fetchEvents, quality } from '../../actions/index'
 import SpeedometerPH from './charts/SpeedometerPH'
 import SpeedometerPressure from './charts/SpeedometerPressure'
 
@@ -10,6 +10,7 @@ class EventsList extends React.Component {
 
     componentDidMount(){
         this.props.fetchEvents(this.props.deviceId)
+        this.props.quality(this.props.deviceId);
     }
 
     renderList(){
@@ -54,8 +55,9 @@ const mapStateToProps = (state, ownProps) => {
         deviceId: ownProps.match.params.device_id,
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn,
-        events: Object.values(state.events)
+        events: Object.values(state.events),
+        device_quality: state.quality
     }
 }
 
-export default connect(mapStateToProps, {fetchEvents})(EventsList);
+export default connect(mapStateToProps, {fetchEvents, quality})(EventsList);

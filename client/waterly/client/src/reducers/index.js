@@ -5,6 +5,7 @@ import deviceReducer from './deviceReducer'
 import eventReducer from './eventReducer'
 import notificationsReducer from './notificationsReducer'
 import billsReducer from './billReducer'
+import qualityReducer from './qualityReducer'
 
 
 export default combineReducers({
@@ -13,5 +14,6 @@ export default combineReducers({
     devices: deviceReducer,
     events: eventReducer,
     notifications: notificationsReducer,
-    bills: billsReducer
+    bills: billsReducer,
+    quality: qualityReducer
 });
