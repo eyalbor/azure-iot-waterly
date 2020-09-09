@@ -178,7 +178,7 @@ namespace Waterly_iot_functions
             }
 
             var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{eventItem.device_id}' AND " +
-                $"c.created_at >  {(now - TimeSpan.FromDays(7).TotalSeconds)} AND " +
+                $"c.created_at >  {(now - TimeSpan.FromDays(1).TotalSeconds)} AND " +
                 $"c.type = '{type}' order by c.created_at";
 
             logger.LogInformation("Checking older alerts...");
@@ -223,10 +223,10 @@ namespace Waterly_iot_functions
                 created_at = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                 type = type,
                 user_id = userId,
-                status = false,
+                status = true,
                 evidence = evidence,
                 device_name = device_name,
-                message = "Contact with technician"
+                message = "Please contact with your local service center"
             };
 
             // Create an item in the container representing alert.

@@ -69,11 +69,11 @@ namespace Waterly_iot_functions
             mm.Attachments.Add(new Attachment(memoryStream, "attachment.pdf"));
             SmtpClient smtp = new SmtpClient
             {
+                UseDefaultCredentials = false,
                 Host = "smtp.gmail.com",
                 Port = 587,
                 EnableSsl = true,
-                Credentials = new NetworkCredential("iot.waterly@gmail.com", "waterly1234")
-
+                Credentials = new NetworkCredential("iot.waterly@gmail.com", "ytqhegrwwjjbhpft")
             };
             smtp.Send(mm);
             Console.WriteLine($"Mail sent succesfuly to {reciever}");
@@ -99,10 +99,9 @@ namespace Waterly_iot_functions
         public static void sendMailBillPaymentConfirmation(BillItem billItem, string userId)
         {
             string subject = $"Confirmation Mail for Bill Payment - {getMonth(billItem.month)} {billItem.year}";
-            string mailBody = $"Thanks!, \n\n" +
+            string mailBody = $"Thanks!\n\n" +
                 $"You just paid your {getMonth(billItem.month)} {billItem.year} water bill.\n" +
-                $"your payment was proccessed successfully.\n" +
-                $"Your invoice is attached to this mail.\n\n" +
+                $"Your payment was proccessed successfully.\n\n" +
                 $"Thanks!\n" +
                 $"WATERLY team.";
             string reciever = getEmailAddresByUserId(userId).Result;
@@ -115,7 +114,8 @@ namespace Waterly_iot_functions
             string subject = $"Attention! We have just detected an abnormal values in your water system.";
             string mailBody = $"Dear WATERLY user,\n\n" +
                 $"We have just detected an abnormal values in your water system.\n" +
-                $"Issue detected: {alertItem.type}. {alertItem.message}.\n" +
+                $"Issue detected: {alertItem.type}.\n" +
+                $"{alertItem.message}.\n" +
                 $"After finding out, we will be thankful if you could give us feedback " +
                 $"on this alert in the alerts section in your account.\n\n" +
                 $"Thanks!\n" +

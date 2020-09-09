@@ -6,6 +6,7 @@ import GoogleAuth from './GoogleAuth'
 import { renderTime } from '../actions/timestamp'
 import Badge from '@material-ui/core/Badge';
 import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
+import Button from '@material-ui/core/Button';
 
 class Header extends React.Component {
 
@@ -55,8 +56,10 @@ class Header extends React.Component {
                             <div className="divider"></div>
                             <div className="ui list" style={{padding: "20px"}}>
                                 {this.showNotifications()}
-                                <div className="divider"></div>
-                                <a href={'/notifications'}>See All Alerts</a>
+
+                                <Button variant="outlined" color="primary" component={Link} to="/notifications">
+                                    See All Alerts
+                                </Button>
                             </div>
                         </div>
                     </button >

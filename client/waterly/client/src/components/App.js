@@ -11,7 +11,7 @@ import HomePage from './HomePage'
 import Notfound from './NoFound'
 import history from '../history'
 import ProtectedRoute from '../actions/ProtectedRoute'
-import Notifications from './notifications/NotificationPage';
+import NotificationPage from './notifications/NotificationPage';
 
 const App = () => {
   return (
@@ -26,7 +26,7 @@ const App = () => {
               <ProtectedRoute path="/devices/edit/:id" exact component={DeviceEdit}/>
               <ProtectedRoute path="/devices/delete" exact component={DeviceDelete}/>
               <Route path="/events/device/:device_id" exact component={EventsList}/>
-              <Route path="/notifications" exact component={Notifications}/>
+              <Route path="/notifications" exact component={NotificationPage}/>
               <Route component={Notfound} />
             </Switch>
       </Router>

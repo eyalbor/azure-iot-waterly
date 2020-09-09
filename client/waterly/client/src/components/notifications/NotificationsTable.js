@@ -50,12 +50,15 @@ const tableIcons = {
 };
 
 function renderFeedback(feedback){
-    console.log(feedback.toLowerCase().trim())
-    switch(feedback.toLowerCase().trim()){
-        case "true": case "yes": case "1": return 'True';
-        case "false": case "no": case "0": return 'False';
-        case "none": case 'null': return 'None'
-        default: return Boolean(feedback);
+    if(feedback!= null){
+        switch(feedback.toLowerCase().trim()){
+            case "true": case "yes": case "1": return 'True';
+            case "false": case "no": case "0": return 'False';
+            case "none": case 'null': return 'None'
+            default: return Boolean(feedback);
+        }
+    }else{
+        return 'None'
     }
 }
 

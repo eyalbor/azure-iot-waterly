@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { fetchBills, payForBill } from '../../actions'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Paper from '@material-ui/core/Paper';
+import { strMonth } from '../../actions/month'
 import {
     Chart,
     Title,
@@ -89,7 +90,7 @@ class BillShow extends React.Component {
             return (     
                 <div className="ui card" key={bill.id} style={{padding: "10px", margin:"10px"}}>
                     <div className="content">
-                        <div className="header"> {bill.month} {bill.year}</div>
+                        <div className="header"> {strMonth[bill.month-1]} {bill.month}/{bill.year}</div>
                         <div className="meta">
                             Total flow: {bill.total_flow} m³/s
                             <br/>
