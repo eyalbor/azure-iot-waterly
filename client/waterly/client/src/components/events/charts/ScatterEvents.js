@@ -40,7 +40,7 @@ const ScatterEvents= ({data}) => {
           <Title text="Ph vs Pressure" />
           <ArgumentAxis title="ph" tickInterval={1} visualRange={[0,14]}>
           <ConstantLine
-            value={6.9}
+            value={6.8}
             width={2}
             color="#fc3535"
             dashStyle="dash"
@@ -49,7 +49,7 @@ const ScatterEvents= ({data}) => {
           </ConstantLine>
 
           <ConstantLine
-            value={7.1}
+            value={7.8}
             width={2}
             color="#fc3535"
             dashStyle="dash"
@@ -58,7 +58,7 @@ const ScatterEvents= ({data}) => {
           </ConstantLine>
 
             </ArgumentAxis>
-          <ValueAxis title="pressure [atm]" tickInterval={1} visualRange={[0,5]}>
+          <ValueAxis title="pressure [atm]" tickInterval={1} visualRange={[0,7]}>
 
           <ConstantLine
             value={1.2}
@@ -70,7 +70,7 @@ const ScatterEvents= ({data}) => {
           </ConstantLine>
 
           <ConstantLine
-            value={2.5}
+            value={5}
             width={2}
             color="#fc3535"
             dashStyle="dash"

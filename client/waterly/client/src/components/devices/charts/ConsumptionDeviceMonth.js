@@ -9,11 +9,14 @@ import Chart, {
   Tooltip,
   Title,
   Grid,
-  Format
+  Format,
+  ArgumentAxis,
+  Label
 } from 'devextreme-react/chart';
 import _ from 'lodash'
 
 import { consumptionForYearEachMonth } from '../../../actions/index'
+import { strMonth } from '../../../actions/month'
 
 // export const devicesSources = [
 //   { value: 'WaterlyIotDevice1', name: 'WaterlyIotDevice2' },
@@ -30,6 +33,10 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
     super(props);
     console.log("props" + props)
     this.state = {data: null, devices: null}
+  }
+
+  customizeText(e) {
+    return `${strMonth[e.value-1]} ${e.value}`;
   }
 
   prepareDataForChart(data){
@@ -94,6 +101,9 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
             name="Average"
             color="#008fd8"
           />
+          <ArgumentAxis>
+            <Label customizeText={this.customizeText} />
+          </ArgumentAxis>
   
           <ValueAxis>
             
