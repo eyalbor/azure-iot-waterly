@@ -69,6 +69,7 @@ class DeviceList extends React.Component {
                 <ConsumptionDeviceMonth userId={this.props.currentUserId}/>
                 <br/>
                 <MapContainer2/>
+                <br/><br/><br/>
             </div>
         );
     }
