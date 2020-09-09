@@ -75,13 +75,13 @@ namespace Waterly_iot_functions
             // query first water read of this month
 
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
-            FeedResponse<EventItem> currentResultSet;
+            FeedIterator<DataTypes> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<DataTypes>(queryDefinition);
+            FeedResponse<DataTypes> currentResultSet;
 
             while (queryResultSetIterator.HasMoreResults)
             {
                 currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                EventItem firstEventItemInTheMonth = currentResultSet.FirstOrDefault<EventItem>();
+                DataTypes firstEventItemInTheMonth = currentResultSet.FirstOrDefault<DataTypes>();
                 waterReadfirstEventInTheMonth = firstEventItemInTheMonth.water_read;
             }
 
@@ -93,12 +93,12 @@ namespace Waterly_iot_functions
             // query first water read of last month
 
             queryDefinition = new QueryDefinition(sqlQueryText);
-            queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            queryResultSetIterator = Resources.events_container.GetItemQueryIterator<DataTypes>(queryDefinition);
          
             while (queryResultSetIterator.HasMoreResults)
             {
                 currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                EventItem firstEventItemInTheLastMonth = currentResultSet.FirstOrDefault<EventItem>();
+                DataTypes firstEventItemInTheLastMonth = currentResultSet.FirstOrDefault<DataTypes>();
                 waterReadfirstEventInTheLastMonth = firstEventItemInTheLastMonth.water_read;
             }
 

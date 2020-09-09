@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Data;
 using System.Net;
 using System.Net.Mail;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using iTextSharp.text.html.simpleparser;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using System.Linq;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace Waterly_iot_functions
@@ -85,9 +78,9 @@ namespace Waterly_iot_functions
             string mailBody = $"Hey {userItem.full_name}, \n" +
                 $"Your monthly bill for {getMonth(billItem.month)} {billItem.year} has just arrived! \n\n" +
                 $"Total consumption this month: {billItem.total_flow/1000000} cubic meters \n" +
-                $"Water Expenses: {billItem.water_expenses}$ \n" +
-                $"Fixed Expenses: {billItem.fixed_expenses}$ \n" +
-                $"Total: {billItem.water_expenses + billItem.fixed_expenses}$ \n\n" +
+                $"Water Expenses: {billItem.water_expenses}ILS \n" +
+                $"Fixed Expenses: {billItem.fixed_expenses}ILS \n" +
+                $"Total: {billItem.water_expenses + billItem.fixed_expenses}ILS \n\n" +
                 $"Please go over to {siteUrl} to pay it. \n\n" +
                 $"Thanks for using WATERLY!\n" +
                 $"WATERLY team.";

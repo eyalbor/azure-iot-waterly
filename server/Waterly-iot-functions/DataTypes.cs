@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Waterly_iot_functions
+﻿namespace Waterly_iot_functions
 {
     public class Address
     {
@@ -82,14 +78,6 @@ namespace Waterly_iot_functions
         public long last_water_read { get; set; }
         public long first_water_read { get; set; }
 
-    }
-
-    public class WaterlyBillReq
-    {
-        public string email { get; set; }
-        public string invoice { get; set; }
-        public float amount { get; set; }
-        public string task { get; set; }
     }
 
 }

@@ -4,7 +4,6 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.WebJobs;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace Waterly_iot_functions
 {
@@ -16,6 +15,7 @@ namespace Waterly_iot_functions
         public static String LEAKAGE = "Possible leakage";
         public static String ABNORMAL_PH_LEVEL = "Abnormal PH level";
         public static String ABNORMAL_PRESSURE_LEVEL = "Abnormal pressure level";
+        public static String ABNORMAL_SALINITY_LEVEL = "Abnormal salinity level";
         private static ILogger logger;
 
         [FunctionName("execute_detection_logic")]
@@ -27,9 +27,11 @@ namespace Waterly_iot_functions
             Task ph = detectPHLevel(eventItem, userId);
             Task pressure = detectPressureLevel(eventItem, userId);
             Task leakage = detectLeakage(eventItem, userId);
+            Task salinity = detectSalinityLevel(eventItem, userId);
 
             await ph;
             await pressure;
+            await salinity;
             await leakage;
         }
 
@@ -68,6 +70,40 @@ namespace Waterly_iot_functions
             }
         }
 
+        public static async Task detectSalinityLevel(EventItem eventItem, string userId)
+        {
+            float avgSalinity = 0;
+            int numOfSamples = Resources.numOfSamples;
+            var sqlQueryText = $"SELECT TOP {numOfSamples} * FROM c WHERE c.device_id = '{eventItem.device_id}' " +
+                    "order by c.timestamp DESC";
+
+            logger.LogInformation("Observing salinity level...");
+            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+            FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            FeedResponse<EventItem> currentResultSet;
+
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (EventItem item in currentResultSet)
+                {
+                    avgSalinity += item.salinity;
+                }
+            }
+
+            avgSalinity = avgSalinity / numOfSamples;
+
+            if (avgSalinity != 0)
+            {
+                if (avgSalinity > 300)
+                {
+                    //There is abnormal PH level
+                    string evidence = $"Salinity: {avgSalinity}";
+                    logger.LogInformation(ABNORMAL_SALINITY_LEVEL + " , " + evidence);
+                    await suppressDetection(eventItem, ABNORMAL_SALINITY_LEVEL, userId, evidence);
+                }
+            }
+        }
 
         public static async Task detectPressureLevel(EventItem eventItem, string userId)
         {
@@ -103,7 +139,6 @@ namespace Waterly_iot_functions
                 }
             }
         }
-
 
         public static async Task detectLeakage(EventItem eventItem, string userId)
         {
@@ -197,7 +232,6 @@ namespace Waterly_iot_functions
             }
             await createAlert(eventItem, type, userId, evidence);
         }
-
 
         public static async Task createAlert(EventItem eventItem, string type, string userId, string evidence)
         {

@@ -4,9 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,59 +16,9 @@ using System.IO;
 
 namespace Waterly_iot_functions
 {
-
-    //inserts events from simulation to tables (by trigger)
     public static class Function1
     {
- 	[FunctionName("InsertEvent")] 
-        public static async Task InsertEvent([EventHubTrigger("waterlyeventhub", Connection = "str")] EventData eventData, ILogger log)
-        {
-
-            log.LogInformation("C# event hub trigger function processed events.");
-            string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
-            log.LogInformation($"Event message is : {messageBody}");
-            EventItem dataJson = JsonConvert.DeserializeObject<EventItem>(messageBody);
-            dataJson.id = Guid.NewGuid().ToString();
-            await Resources.events_container.CreateItemAsync(dataJson);
-
-
-            //now updates the devices table (the last water read)
-            long last_water_read = dataJson.water_read;
-            long last_update_timestamp = dataJson.timestamp;
-            string device_id = dataJson.device_id;
-
-            log.LogInformation("C# event hub trigger function update rows last_water_read.");
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-
-            DeviceItem deviceItem = Resources.docClient.CreateDocumentQuery<DeviceItem>(
-                UriFactory.CreateDocumentCollectionUri("waterly_db", "waterly_devices"), option)
-                .Where(deviceItem => deviceItem.id.Equals(device_id))
-                .AsEnumerable()
-                .First();
-
-            // Correcting out of orderness
-            if (deviceItem.last_update_timestamp < last_update_timestamp)
-            {
-                deviceItem.last_water_read = last_water_read;
-                deviceItem.last_update_timestamp = last_update_timestamp;
-            }
-
-
-            ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
-                UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", deviceItem.id),
-                deviceItem);
-
-            var updated = response.Resource;
-
-            //execute detector
-            await Detector.executeDetectionLogic(dataJson, deviceItem.userId, log);
-
-        }
-
-
-
-
-        [FunctionName("get_devices_by_user_id")] //works
+        [FunctionName("get_devices_by_user_id")] 
         public static IActionResult getDevicesOfUser(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "devices/userId={userId}")] HttpRequest request,
             [CosmosDB(
@@ -187,11 +135,8 @@ namespace Waterly_iot_functions
             return new OkObjectResult(consumptions_months_list);
         }
 
-            
 
-
-
-        [FunctionName("get_events_by_device_id")] //todo- doesn't work
+        [FunctionName("get_events_by_device_id")] 
         public static IActionResult getEventsByDeviceId(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "events/device_id={deviceId}")] HttpRequest request,
             [CosmosDB(
@@ -214,7 +159,7 @@ namespace Waterly_iot_functions
         }
 
 
-        [FunctionName("update_bill_paid")] //works
+        [FunctionName("update_bill_paid")] 
         public static async Task<IActionResult> updateBillPaid(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,
             ILogger log)
@@ -241,35 +186,6 @@ namespace Waterly_iot_functions
                 bill_to_pay);
 
             var updated = response.Resource;
-            /*
-            //get user's email address
-            Container UsersContainer = Resources.users_container;
-
-            var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.id = '{user_id}'";
-            QueryDefinition users_query = new QueryDefinition(sqlQueryText);
-            FeedIterator<UserItem> users_iterator = UsersContainer.GetItemQueryIterator<UserItem>(users_query);
-
-
-            Microsoft.Azure.Cosmos.FeedResponse<UserItem> currentResultSet;
-
-            string email_address = "";
-
-            while (users_iterator.HasMoreResults)
-            {
-                currentResultSet = await users_iterator.ReadNextAsync();
-                if (currentResultSet.Count == 0)
-                {
-                    break;
-                }
-                else
-                {
-                    UserItem first_user = currentResultSet.First();
-                    email_address = first_user.email;
-                    break;
-                }
-
-            }
-            */
 
             //send mail
             EmailSender.sendMailBillPaymentConfirmation(bill_to_pay, user_id);
@@ -278,103 +194,7 @@ namespace Waterly_iot_functions
          }
 
 
-
-        /*
-        [FunctionName("update_bill_paid")] //works
-        public static async void updateBillPaid(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "bills/{bill_id}")] HttpRequest request, string bill_id,//todo: make sure http request is right
-            [CosmosDB(
-            databaseName: "waterly_db",
-            collectionName: "bills_table",
-            SqlQuery = "SELECT * FROM c WHERE c.id = {bill_id}", //todo: remember to change here
-            ConnectionStringSetting = "CosmosDBConnection")]
-            IEnumerable<BillItem> bills,
-            ILogger log)
-        {
-            try
-            {
-                if (bills.Count() > 0)
-                {
-                    string email = null;
-                    string userID = bills.First().user_id;
-                    var sqlQueryText = $"SELECT c.email FROM c WHERE c.id = {userID}";
-                    QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-                    Container UsersContainer = Resources.users_container;
-                    FeedIterator<string> queryResultSetIterator = UsersContainer.GetItemQueryIterator<string>(queryDefinition);
-                    List<string> emails = new List<string>();
-                    Microsoft.Azure.Cosmos.FeedResponse<string> currentResultSet;
-                    while (queryResultSetIterator.HasMoreResults)
-                    {
-                        currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                        email = currentResultSet.First();
-                        break;
-                    }
-                    if (email != null)
-                    {
-                        Container bills_container = Resources.bill_container;
-                        var option = new FeedOptions { EnableCrossPartitionQuery = true };
-                        BillItem bill_to_pay = Resources.docClient.CreateDocumentQuery<BillItem>(
-                            UriFactory.CreateDocumentCollectionUri("waterly_db", "bills_table"), option)
-                            .Where(bill_to_pay => bill_to_pay.id.Equals(bill_id))
-                            .AsEnumerable()
-                            .First();
-
-                        ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
-                        UriFactory.CreateDocumentUri("waterly_db", "bills_table", bill_to_pay.id), bill_to_pay);
-
-                        var updated = response.Resource;
-
-                        //WaterlyBillReq billReq = new WaterlyBillReq
-                        //{
-                        //    email = email,
-                        //    task = "!",
-                        //    invoice = bill_id,
-                        //    amount = bill_to_pay.fixed_expenses + bill_to_pay.water_expenses
-                        //};
-                        //return pay(billReq);
-                    }
-                    //return new BadRequestObjectResult(HttpStatusCode.BadRequest);
-                }
-            } catch(System.Exception e){
-                log.LogInformation(e.Message);
-            }
-           
-        }
-
-        private static async Task<IActionResult> pay(WaterlyBillReq billReq)
-        {
-            try
-            {
-                var jsonData = System.Text.Json.JsonSerializer.Serialize(billReq);
-                // requires using System.Net.Http;
-                var client = new HttpClient();
-              
-                HttpResponseMessage result = await client.PostAsync(
-                    // requires using System.Configuration;
-                    "https://prod-26.eastus.logic.azure.com:443/workflows/06a66aa325a84a29b64f788ff1537d50/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-f_3sTNheCjl7dSq3dZzCuqkYChEXDcweiK92DVv_KU",
-                    new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json"));
-
-                var statusCode = result.StatusCode.ToString();
-
-                if (statusCode != "200")
-                {
-                    return new BadRequestObjectResult(statusCode);
-                }
-                else
-                {
-                    return new OkObjectResult(statusCode);
-                }
-            }
-            catch (System.Exception e)
-            {
-                return new BadRequestObjectResult(e.Message);
-            }
-
-        }
-        */
-
-
-        [FunctionName("get_bills_by_user_id")] //works
+        [FunctionName("get_bills_by_user_id")] 
         public static IActionResult getBillsByUserId(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "bills/userId={userId}")] HttpRequest request,
             [CosmosDB(
@@ -398,7 +218,7 @@ namespace Waterly_iot_functions
             return new OkObjectResult(bills_list);
         }
 
-        [FunctionName("get_alerts_by_user_id")] //works
+        [FunctionName("get_alerts_by_user_id")] 
         public static IActionResult getAlertsByUserId(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "notifications/user_id={userId}")] HttpRequest request,
         [CosmosDB(
@@ -425,7 +245,7 @@ namespace Waterly_iot_functions
 
         [FunctionName("get_water_quality_by_device_id")]
         public static IActionResult getWaterQualityByDeviceId(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "quality/device_id={device_id}")] HttpRequest request, //todo: eyal - we changed the route
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "quality/device_id={device_id}")] HttpRequest request, 
             [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "water_table",
@@ -453,7 +273,7 @@ namespace Waterly_iot_functions
         }
 
         
-        [FunctionName("delete_device")] //works
+        [FunctionName("delete_device")] 
         public static async Task<IActionResult> delete_device(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "devices/{device_id}")] HttpRequest request, string device_id, ILogger log) //
         {
@@ -469,7 +289,6 @@ namespace Waterly_iot_functions
             //swipe boolean status
             device_to_delete.status = false;
 
-
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", device_to_delete.id),
                 device_to_delete);
@@ -480,7 +299,7 @@ namespace Waterly_iot_functions
         }
         
 
-        [FunctionName("update_alert")] //todo fix
+        [FunctionName("update_alert")] 
         public static async Task<IActionResult> updateAlert(
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "notifications/{notificationId}")] HttpRequest request, string notificationId,
         ILogger log)
