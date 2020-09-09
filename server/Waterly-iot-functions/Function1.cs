@@ -173,7 +173,7 @@ namespace Waterly_iot_functions
 
 
                     //add to dict
-                    userConsumptionPerMonthDict.Add(device_item.id, consumption_per_device_month);
+                    userConsumptionPerMonthDict.Add(device_item.name, consumption_per_device_month);
                 }
 
                 consumptions_months_list.Add(userConsumptionPerMonthDict); 
