@@ -48,8 +48,13 @@ namespace Waterly_iot_functions
                 .AsEnumerable()
                 .First();
 
-            deviceItem.last_water_read = last_water_read;
-            deviceItem.last_update_timestamp = last_update_timestamp;
+            // Correcting out of orderness
+            if (deviceItem.last_update_timestamp < last_update_timestamp)
+            {
+                deviceItem.last_water_read = last_water_read;
+                deviceItem.last_update_timestamp = last_update_timestamp;
+            }
+
 
             ResourceResponse<Document> response = await Resources.docClient.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri("waterly_db", "waterly_devices", deviceItem.id),

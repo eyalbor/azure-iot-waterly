@@ -178,7 +178,7 @@ namespace Waterly_iot_functions
             }
 
             var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{eventItem.device_id}' AND " +
-                $"c.created_at >  {(now - TimeSpan.FromDays(7).TotalSeconds)} AND " +
+                $"c.created_at >  {(now - TimeSpan.FromDays(1).TotalSeconds)} AND " +
                 $"c.type = '{type}' order by c.created_at";
 
             logger.LogInformation("Checking older alerts...");
