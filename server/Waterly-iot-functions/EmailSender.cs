@@ -69,6 +69,7 @@ namespace Waterly_iot_functions
             mm.Attachments.Add(new Attachment(memoryStream, "attachment.pdf"));
             SmtpClient smtp = new SmtpClient
             {
+                UseDefaultCredentials = false,
                 Host = "smtp.gmail.com",
                 Port = 587,
                 EnableSsl = true,
