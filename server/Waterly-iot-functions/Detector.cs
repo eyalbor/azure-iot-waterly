@@ -226,7 +226,7 @@ namespace Waterly_iot_functions
                 status = false,
                 evidence = evidence,
                 device_name = device_name,
-                message = "Contact with technician"
+                message = "Please contact with your local service center"
             };
 
             // Create an item in the container representing alert.

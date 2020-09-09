@@ -73,8 +73,7 @@ namespace Waterly_iot_functions
                 Host = "smtp.gmail.com",
                 Port = 587,
                 EnableSsl = true,
-                Credentials = new NetworkCredential("iot.waterly@gmail.com", "waterly1234")
-
+                Credentials = new NetworkCredential("iot.waterly@gmail.com", "ytqhegrwwjjbhpft")
             };
             smtp.Send(mm);
             Console.WriteLine($"Mail sent succesfuly to {reciever}");
@@ -116,7 +115,8 @@ namespace Waterly_iot_functions
             string subject = $"Attention! We have just detected an abnormal values in your water system.";
             string mailBody = $"Dear WATERLY user,\n\n" +
                 $"We have just detected an abnormal values in your water system.\n" +
-                $"Issue detected: {alertItem.type}. {alertItem.message}.\n" +
+                $"Issue detected: {alertItem.type}.\n" +
+                $"{alertItem.message}.\n" +
                 $"After finding out, we will be thankful if you could give us feedback " +
                 $"on this alert in the alerts section in your account.\n\n" +
                 $"Thanks!\n" +
