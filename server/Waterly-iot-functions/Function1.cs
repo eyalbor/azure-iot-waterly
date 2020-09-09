@@ -236,7 +236,7 @@ namespace Waterly_iot_functions
                 bill_to_pay);
 
             var updated = response.Resource;
-
+            /*
             //get user's email address
             Container UsersContainer = Resources.users_container;
 
@@ -264,8 +264,10 @@ namespace Waterly_iot_functions
                 }
 
             }
+            */
 
             //send mail
+            EmailSender.sendMailBillPaymentConfirmation(bill_to_pay, user_id);
 
             return new OkObjectResult(bill_to_pay);
          }
