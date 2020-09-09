@@ -170,7 +170,7 @@ class NotificationsTable extends React.Component {
                         actions={[
                             rowData => ({
                                 icon: () => <VisibilityOffIcon/>,
-                                tooltip: "Close",
+                                tooltip: "Mark as 'still ongoing'",
                                 hidden: rowData.status===true,
                                 onClick: (event, rowData) => {
                                     console.log("Close " + rowData)
@@ -179,7 +179,7 @@ class NotificationsTable extends React.Component {
                             }),
                             rowData => ({
                                 icon: () => <VisibilityIcon />,
-                                tooltip: "Open",
+                                tooltip: "Mark as Done",
                                 hidden: rowData.status===false,
                                 onClick: (event, rowData) => {
                                     console.log("open " + rowData)

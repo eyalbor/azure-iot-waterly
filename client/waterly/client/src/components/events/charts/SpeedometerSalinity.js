@@ -4,16 +4,16 @@ import ReactSpeedometer from "react-d3-speedometer"
 const SpeedometerSalinity = props => {
     return (
     <div className="ui center aligned compact segment">
-        <h4 class="ui header">Current Avarege Salinity</h4>
+        <h4 class="ui header">Current Average Salinity</h4>
         <ReactSpeedometer
-            maxValue={2500}
+            maxValue={450}
             minValue={0}
             width={300}
             needleHeightRatio={0.6}
             value={props.avg}
             currentValueText={`Salinity : ${props.avg} mg/L` }
             segments={6}
-            customSegmentStops={[0,100,250,400,2500]}
+            customSegmentStops={[0,50,100,150,200,250,300,350,400,450]}
             startColor="blue"
             endColor="#e6e600"
             ringWidth={47}

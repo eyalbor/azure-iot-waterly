@@ -90,9 +90,9 @@ class BillShow extends React.Component {
             return (     
                 <div className="ui card" key={bill.id} style={{padding: "10px", margin:"10px"}}>
                     <div className="content">
-                        <div className="header"> {strMonth[bill.month-1]} {bill.month}/{bill.year}</div>
+                        <div className="header"> {strMonth[bill.month-1]} {bill.year}</div>
                         <div className="meta">
-                            Total flow: {bill.total_flow} m³/s
+                            Total flow: {10*((Math.floor(bill.total_flow/1000000)).toFixed(0))} [cubic meter]
                             <br/>
                             Water expenses: {bill.water_expenses} ILS
                             <br/>

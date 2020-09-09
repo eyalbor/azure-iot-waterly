@@ -36,7 +36,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
   }
 
   customizeText(e) {
-    return `${strMonth[e.value-1]} ${e.value}`;
+    return `${strMonth[e.value-1]}`; 
   }
 
   prepareDataForChart(data){
@@ -111,7 +111,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
           <ValueAxis
             name="Average"
             position="right"
-            title="Average Consumption, m^3/s"
+            title="Average Consumption, cubic meter"
           >
           <Grid visible={true} />
           </ValueAxis>

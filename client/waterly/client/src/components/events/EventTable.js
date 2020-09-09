@@ -53,11 +53,11 @@ const useStyles = makeStyles((theme) => ({
 const EventTable = ({data, deviceId}) => {
     const classes = useStyles();
     var columns = [
-      {title: "Meter reading", field: "water_read"},
       {title: "Reading time", field: "timestamp", render: rowData => renderTime(rowData.timestamp)},
+      {title: "Meter reading", field: "water_read"},
       {title: "PH", field: "ph"},
       {title: "Pressure [atm]", field: "pressure"},
-      {title: "Salinity [ppt]", field: "salinity"},
+      {title: "Salinity [mg/L]", field: "salinity"},
     ]
     // const [data, setData] = useState([]); //table data
     const [selectedRow, setSelectedRow] = useState(null);
