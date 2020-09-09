@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Linq;
-using Bugsnag.Payload;
-using System.IO;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using System.Net.Http;
 
 
 
@@ -75,13 +67,13 @@ namespace Waterly_iot_functions
             // query first water read of this month
 
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<DataTypes> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<DataTypes>(queryDefinition);
-            FeedResponse<DataTypes> currentResultSet;
+            FeedIterator<EventItem> queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
+            FeedResponse<EventItem> currentResultSet;
 
             while (queryResultSetIterator.HasMoreResults)
             {
                 currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                DataTypes firstEventItemInTheMonth = currentResultSet.FirstOrDefault<DataTypes>();
+                EventItem firstEventItemInTheMonth = currentResultSet.FirstOrDefault<EventItem>();
                 waterReadfirstEventInTheMonth = firstEventItemInTheMonth.water_read;
             }
 
@@ -93,12 +85,12 @@ namespace Waterly_iot_functions
             // query first water read of last month
 
             queryDefinition = new QueryDefinition(sqlQueryText);
-            queryResultSetIterator = Resources.events_container.GetItemQueryIterator<DataTypes>(queryDefinition);
+            queryResultSetIterator = Resources.events_container.GetItemQueryIterator<EventItem>(queryDefinition);
          
             while (queryResultSetIterator.HasMoreResults)
             {
                 currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                DataTypes firstEventItemInTheLastMonth = currentResultSet.FirstOrDefault<DataTypes>();
+                EventItem firstEventItemInTheLastMonth = currentResultSet.FirstOrDefault<EventItem>();
                 waterReadfirstEventInTheLastMonth = firstEventItemInTheLastMonth.water_read;
             }
 
