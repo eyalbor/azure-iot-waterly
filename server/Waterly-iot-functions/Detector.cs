@@ -223,7 +223,7 @@ namespace Waterly_iot_functions
                 created_at = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                 type = type,
                 user_id = userId,
-                status = false,
+                status = true,
                 evidence = evidence,
                 device_name = device_name,
                 message = "Please contact with your local service center"

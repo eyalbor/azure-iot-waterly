@@ -99,10 +99,9 @@ namespace Waterly_iot_functions
         public static void sendMailBillPaymentConfirmation(BillItem billItem, string userId)
         {
             string subject = $"Confirmation Mail for Bill Payment - {getMonth(billItem.month)} {billItem.year}";
-            string mailBody = $"Thanks!, \n\n" +
+            string mailBody = $"Thanks!\n\n" +
                 $"You just paid your {getMonth(billItem.month)} {billItem.year} water bill.\n" +
-                $"your payment was proccessed successfully.\n" +
-                $"Your invoice is attached to this mail.\n\n" +
+                $"Your payment was proccessed successfully.\n\n" +
                 $"Thanks!\n" +
                 $"WATERLY team.";
             string reciever = getEmailAddresByUserId(userId).Result;
