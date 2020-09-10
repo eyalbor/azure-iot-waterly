@@ -44,21 +44,22 @@ namespace Waterly_iot_functions
 
 
 
-        [FunctionName("get_comsumption_of_user")] //todo: take the year out of the request - still doesn't work
+        [FunctionName("get_comsumption_of_user")] 
         public static async Task<IActionResult> getUserConsumption(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consumption_per_month/userId={userId}")] HttpRequest request,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consumption_per_month/userId={userId}&year={year}")] HttpRequest request,
         [CosmosDB(
                 databaseName: "waterly_db",
                 collectionName: "waterly_devices",
                 ConnectionStringSetting = "CosmosDBConnection",
                 SqlQuery = "SELECT * FROM c WHERE c.userId = {userId}")]
                 IEnumerable<DeviceItem> devices,
+                string year,
                 ILogger log)
 
         {
             Container BillsContainer = Resources.bill_container;
             Container ConsumptionContainer = Resources.monthly_consumption_container;
-
+            int cur_year = Int32.Parse(year);
 
             //for all year, dict for month number and dict userConsumptionPerMonthDict
             List<Dictionary<string, long>> consumptions_months_list = new List<Dictionary<string, long>>();
@@ -71,7 +72,7 @@ namespace Waterly_iot_functions
                 userConsumptionPerMonthDict.Add("Month", month_num);
 
                 //Add avg per month
-                var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.month = {month_num}";
+                var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.month = {month_num} AND c.year = {cur_year}";
                 QueryDefinition bills_query = new QueryDefinition(sqlQueryText);
                 FeedIterator<BillItem> bill_iterator = BillsContainer.GetItemQueryIterator<BillItem>(bills_query);
 
@@ -101,9 +102,8 @@ namespace Waterly_iot_functions
                 foreach (DeviceItem device_item in devices)
                 {
                     //calculate sum for month_num for device_item
-                    int year = DateTime.Today.Year;
                     string device_id = device_item.id;
-                    sqlQueryText = $"SELECT * FROM c WHERE c.month = {month_num} AND c.year = {year} AND c.device_id = '{device_id}'";
+                    sqlQueryText = $"SELECT * FROM c WHERE c.month = {month_num} AND c.year = {cur_year} AND c.device_id = '{device_id}'";
                     QueryDefinition consumption_query = new QueryDefinition(sqlQueryText);
                     FeedIterator<MonthlyDeviceConsumptionItem> consumption_iterator = ConsumptionContainer.GetItemQueryIterator<MonthlyDeviceConsumptionItem>(consumption_query);
                     long consumption_per_device_month = 0;

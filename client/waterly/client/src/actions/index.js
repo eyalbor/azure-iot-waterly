@@ -40,8 +40,8 @@ export const setUser = (user) =>  (dispatch) => {
 }
 
 export const consumptionForYearEachMonth = (userId, year) => {
-    return myUrl.get(`/consumption_per_month/userId=${userId}`)
-    //return myUrl.get(`/consumption_per_month/userId=${userId}&year=${year}`)
+    //return myUrl.get(`/consumption_per_month/userId=${userId}`)
+    return myUrl.get(`/consumption_per_month/userId=${userId}&year=${year}`)
 }
 
 export const fetchNotifications = () => async (dispatch, getState) => {
