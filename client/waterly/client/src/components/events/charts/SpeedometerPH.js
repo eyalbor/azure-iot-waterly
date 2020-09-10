@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactSpeedometer from "react-d3-speedometer"
-import Paper from '@material-ui/core/Paper';
 
 const SpeedometerPH = props => {
     //console.log(props)
@@ -10,6 +9,7 @@ const SpeedometerPH = props => {
         <ReactSpeedometer
             maxValue={14}
             width={300}
+            height={200}
             needleHeightRatio={0.6}
             value={props.avg}
             currentValueText={`Ph: ${props.avg}` }

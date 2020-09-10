@@ -19,7 +19,7 @@ class EventsList extends React.Component {
         {
             return (
                 <div className="ui container">
-                    <h3>Device <u>{this.props.deviceId}</u> Events</h3>
+                    <h3>Device <u>{this.props.name}</u> Events</h3>
                     <EventsTable data={this.props.events} deviceId={this.props.deviceId}/>
                     <br/>
                     <div className="ui relaxed centered grid container">
@@ -50,6 +50,7 @@ class EventsList extends React.Component {
 const mapStateToProps = (state, ownProps) => {
     return {
         deviceId: ownProps.match.params.device_id,
+        name:ownProps.match.params.name,
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn,
         events: Object.values(state.events),

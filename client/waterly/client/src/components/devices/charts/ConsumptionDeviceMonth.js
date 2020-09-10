@@ -1,5 +1,9 @@
 import * as React from 'react';
 import Paper from '@material-ui/core/Paper';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 import Chart, {
   CommonSeriesSettings,
   Series,
@@ -32,7 +36,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
   constructor(props) {
     super(props);
     //console.log("props" + props)
-    this.state = {data: null, devices: null}
+    this.state = {data: null, devices: null, year:2020}
   }
 
   customizeText(e) {
@@ -64,7 +68,11 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
   }
 
   componentDidMount(){
-    consumptionForYearEachMonth(this.props.userId)
+    this.getData(this.state.year)
+  }
+
+  getData(year){
+    consumptionForYearEachMonth(this.props.userId,year)
     .then(res=>{
       //console.log(res.data)
       this.prepareDataForChart(res.data)
@@ -74,11 +82,27 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
     })
   }
 
+  handleChange = (event) => {
+    let year = event.target.value
+    this.setState({year})
+    console.log(year);
+    this.getData(year)
+  };
+
   render() {
     if(this.state.devices != null){
       //console.log(this.state)
       return (
         <Paper>
+        <span>Show water consumption by year:&nbsp;
+          <Select
+            onChange={this.handleChange}
+            value={this.state.year}
+          >
+            <MenuItem value={2020}>2020</MenuItem>
+            <MenuItem value={2019}>2019</MenuItem>
+          </Select>
+        </span>
         <Chart
           id="chartConsumption"
           palette="Soft"

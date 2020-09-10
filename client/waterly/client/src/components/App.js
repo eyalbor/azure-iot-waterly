@@ -25,7 +25,7 @@ const App = () => {
               <ProtectedRoute path="/devices/new" exact component={DeviceCreate}/>
               <ProtectedRoute path="/devices/edit/:id" exact component={DeviceEdit}/>
               <ProtectedRoute path="/devices/delete" exact component={DeviceDelete}/>
-              <Route path="/events/device/:device_id" exact component={EventsList}/>
+              <Route path="/events/device/:device_id/:name" exact component={EventsList}/>
               <Route path="/notifications" exact component={NotificationPage}/>
               <Route component={Notfound} />
             </Switch>

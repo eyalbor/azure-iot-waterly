@@ -87,6 +87,7 @@ class Header extends React.Component {
         return (
         <div className="ui massive inverted menu">
             <Link to="/" className="header item">
+            <img alt="logo" src="/logo200.png" className="ui centered mini image"/>
                 Waterly
             </Link>
             {this.showUser()}

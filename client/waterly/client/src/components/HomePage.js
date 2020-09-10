@@ -8,13 +8,16 @@ class HomePage extends React.Component {
             <div>
                 <div className="ui vertical masthead center aligned basic segment">
                     <div className="ui text container">
-                        <h1 className="ui violet header">
-                            <b>Waterly</b>
-                        </h1>
-                        <h3>Your Water Consumption Just Got Smarter.</h3>
-                        {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
-                        <a href='http://kineret.org.il/miflasim/'><img  alt="kineret" src="/kineret.png" className="ui medium centered image"/></a>
+                        <img alt="logo" src="/logo200s.png" className="ui centered large image"/>
                         
+                        <h1 className="ui violet header">
+                            Your Water Consumption Just Got Smarter
+                        </h1>
+                        <br/>
+                        {/* <div className="ui huge red google button">Sign In <i className="right arrow icon"></i></div> */}
+                        <a href='http://kineret.org.il/miflasim/'>
+                            <img title="see kineret water level" alt="see kineret water level" src="/kineret.png" className="ui small centered image"/>
+                        </a>
                         <br/>
                     </div>
                 </div>

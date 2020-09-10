@@ -9,13 +9,14 @@ const SpeedometerSalinity = props => {
             maxValue={450}
             minValue={0}
             width={300}
+            height={200}
             needleHeightRatio={0.6}
             value={props.avg}
             currentValueText={`Salinity : ${props.avg} mg/L` }
             segments={6}
             customSegmentStops={[0,50,100,150,200,250,300,350,400,450]}
             startColor="blue"
-            endColor="#e6e600"
+            endColor="brown"
             ringWidth={47}
             needleTransitionDuration={3333}
             needleTransition="easeElastic"
