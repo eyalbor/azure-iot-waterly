@@ -46,16 +46,16 @@ export const consumptionForYearEachMonth = (userId) => {
 export const fetchNotifications = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
     const response = await myUrl.get(`/notifications/user_id=${userId}`);
-    console.log('fetchNotifications')
-    console.log(response.data)
+    //console.log('fetchNotifications')
+    //console.log(response.data)
     dispatch({type: FETCH_NOTIFICATIONS, payload: response.data})
 };
 
 export const updateNotification = (notification) => async (dispatch) => {
-    console.log(notification)
+    //console.log(notification)
     const response =  await myUrl.patch(`/notifications/${notification.id}`, notification)
-    console.log('updateNotification')
-    console.log(response.data)
+    //console.log('updateNotification')
+    //console.log(response.data)
     dispatch({type: EDIT_NOTIFICATION, payload: response.data})
 };
 
@@ -70,15 +70,15 @@ export const fetchDevices = () =>  async (dispatch, getState) => {
     const { userId } = getState().auth;
     //return myUrl.get(`/devices/${userId}`);
     const response = await myUrl.get(`/devices/userId=${userId}`);
-    console.log('fetchDevices')
-    console.log(response.data)
+    //console.log('fetchDevices')
+    //console.log(response.data)
     dispatch({type: FETCH_DEVICES, payload: response.data})
 };
 
 export const fetchDevice = (id) => async dispatch => {
     const response = await myUrl.get(`/devices/${id}`);
-    console.log('fetchDevice')
-    console.log(response.data)
+    //console.log('fetchDevice')
+    //console.log(response.data)
     dispatch({type: FETCH_DEVICE, payload: response.data})
 }
 
@@ -95,30 +95,30 @@ export const deleteDevice = (id) => async dispatch => {
 
 export const fetchEvents = (deviceId) => async (dispatch) => {
     const response = await myUrl.get(`/events/device_id=${deviceId}`);
-    console.log('fetchEvents')
-    console.log(response.data)
+    //console.log('fetchEvents')
+    //console.log(response.data)
     dispatch({type: FETCH_EVENTS, payload: response.data})
 };
 
 export const fetchBills = () => async (dispatch, getState) => {
     const { userId } = getState().auth;
     const response = await myUrl.get(`/bills/userId=${userId}`);
-    console.log('fetchBills')
-    console.log(response.data)
+    //console.log('fetchBills')
+    //console.log(response.data)
     dispatch({type: FETCH_BILLS, payload: response.data})
 }
 
 export const payForBill = (bill) => async (dispatch) => {
-    console.log('payForBill')   
+    //console.log('payForBill')   
     const response = await myUrl.patch(`/bills/${bill.id}`, bill);
-    console.log('payForBill')
-    console.log(response)
+    //console.log('payForBill')
+    //console.log(response)
     dispatch({type: PAY_BILL, payload: response.data})
 }
 
 export const quality = (device_id) => async (dispatch) => {
-    console.log('quality')   
+    //console.log('quality')   
     const response = await myUrl.get(`/quality/device_id=${device_id}`);
-    console.log(response.data)
+    //console.log(response.data)
     dispatch({type: QUALITY_DEVICE, payload: response.data})
 }

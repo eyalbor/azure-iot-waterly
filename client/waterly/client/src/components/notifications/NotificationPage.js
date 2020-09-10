@@ -8,7 +8,7 @@ class NotificationPage extends React.Component {
       
     renderList(){
         if(this.props.isSignedIn) {
-            console.log(this.props.currentUserId)
+            //console.log(this.props.currentUserId)
             return (
                <NotificationsTable user_id={this.props.currentUserId}/>
             );

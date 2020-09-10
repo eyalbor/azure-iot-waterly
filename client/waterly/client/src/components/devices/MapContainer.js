@@ -44,7 +44,7 @@ export class MapContainer extends Component {
 
     displayMarkers(){
         return this.props.devices.map(device => {
-            console.log(device)
+            //console.log(device)
             return <Marker key= {device.device_id} position={
                 {
                     lat: device.lat,

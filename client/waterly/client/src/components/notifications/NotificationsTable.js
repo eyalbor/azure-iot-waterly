@@ -63,7 +63,7 @@ function renderFeedback(feedback){
 }
 
 const columns = [
-    {title: "Id", field: "device_id", editable: 'never'},
+    {title: "Name", field: "device_id", editable: 'never'},
     {title: "Created",editable: 'never', field: "created_at", render: rowData => renderTime(rowData.created_at)},
     {title: "Type", field: "type", editable: 'never'},
     {title: "Message", field: "message",editable: 'never'},
@@ -125,6 +125,9 @@ class NotificationsTable extends React.Component {
         if(!this.props.notifications){
             return <div className="ui active centered inline loader"></div>
         }
+        this.props.notifications.sort(function(a,b){
+            return b.created_at-a.created_at
+        })
         return (
             <Grid container>
                 <Grid item xs={12}></Grid>
@@ -145,8 +148,8 @@ class NotificationsTable extends React.Component {
                         cellEditable={{
                             onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
                                 return new Promise((resolve, reject) => {
-                                    console.log('newValue: ' + newValue);
-                                    console.log(rowData);
+                                    //console.log('newValue: ' + newValue);
+                                    //console.log(rowData);
                                     this.submitFeedbackNotification(rowData,newValue)
                                     setTimeout(resolve, 1000);
                                 });
@@ -173,7 +176,7 @@ class NotificationsTable extends React.Component {
                                 tooltip: "Mark as 'still ongoing'",
                                 hidden: rowData.status===true,
                                 onClick: (event, rowData) => {
-                                    console.log("Close " + rowData)
+                                    //console.log("Close " + rowData)
                                     this.submitNotification(rowData, true)
                                 }
                             }),
@@ -182,7 +185,7 @@ class NotificationsTable extends React.Component {
                                 tooltip: "Mark as Done",
                                 hidden: rowData.status===false,
                                 onClick: (event, rowData) => {
-                                    console.log("open " + rowData)
+                                    //console.log("open " + rowData)
                                     this.submitNotification(rowData, false)
                                 }
                             })

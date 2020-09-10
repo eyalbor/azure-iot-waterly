@@ -27,7 +27,7 @@ class DeviceForm extends React.Component {
     }
 
     onSubmit = (formValues) => {
-        console.log(formValues)
+        //console.log(formValues)
         //parent component need to send onSubmit func
         this.props.onSubmit(formValues)
     }

@@ -106,7 +106,9 @@ const mapStateToProps = (state) => {
         currentUserId: state.auth.userId,
         isSignedIn: state.auth.isSignedIn,
         user: state.auth.user,
-        notifications: Object.values(state.notifications).filter(o => o.status === true)
+        notifications: Object.values(state.notifications).filter(o => o.status === true).sort(function(a,b){
+            return b.created_at-a.created_at
+        })
     }
 }
 

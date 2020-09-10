@@ -70,7 +70,7 @@ const DeviceTable = ({userId}) => {
                 setData(res.data)
             })
             .catch(error=>{
-                console.log("Error")
+                //console.log("Error")
             })
     }, [])
 
@@ -108,7 +108,7 @@ const DeviceTable = ({userId}) => {
     }
 
     const handleRowDelete = (oldData, resolve) => {
-        console.log("handleRowDelete ",oldData)
+        //console.log("handleRowDelete ",oldData)
         api.delete("/devices/"+oldData.id)
         .then(res => {
             const dataDelete = [...data];

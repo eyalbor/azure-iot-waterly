@@ -12,7 +12,7 @@ export default (state = {}, action ) => {
         case FETCH_DEVICES:
             return {...state, ..._.mapKeys(action.payload, 'id')};
         case FETCH_DEVICE:
-            console.log("reducer: " + action.payload)
+            //console.log("reducer: " + action.payload)
             return {...state, [action.payload.device_id]: action.payload};
         case CREATE_DEVICE:
             return {...state, [action.payload.device_id]: action.payload};

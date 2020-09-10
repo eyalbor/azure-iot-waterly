@@ -53,7 +53,7 @@ class BillShow extends React.Component {
     }
 
     toggle = (bill) => {
-        console.log(bill)
+        //console.log(bill)
         this.setState({modal: !this.state.modal, bill: bill})
     }
 
@@ -74,8 +74,8 @@ class BillShow extends React.Component {
     }
 
     pay = (bill) => {
-        console.log('pay')
-        console.log(bill)
+        //console.log('pay')
+        //console.log(bill)
         bill.status = true
         this.props.payForBill(bill);
         this.toggle()
@@ -84,7 +84,7 @@ class BillShow extends React.Component {
     renderCards(){
         //console.log(this.props.bills)
         this.props.bills.sort(function(a,b){
-            return a.month-b.month
+            return b.month-a.month
         })
         return this.props.bills.map(bill => {
             return (     

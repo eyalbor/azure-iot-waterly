@@ -10,12 +10,12 @@ const position = { lng: 34.798248, lat: 32.115221 };
 export class MapContainer2 extends Component {
 
     componentDidMount(){
-        console.log("MapContainer2")
+        //console.log("MapContainer2")
         this.props.fetchDevices()
     }
 
     displayMarkers(){
-        console.log(this.props.devices)
+        //console.log(this.props.devices)
         return this.props.devices.map(device => {
             return (
                 <Marker key= {device.id} position={[device.lat, device.lng]}>

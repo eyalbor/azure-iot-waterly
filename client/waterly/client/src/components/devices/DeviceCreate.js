@@ -7,7 +7,7 @@ import DeviceForm from './DeviceForm';
 class DeviceCreate extends React.Component {
 
     onSubmit = (formValues) => {
-        console.log(formValues)
+        //console.log(formValues)
         this.props.createDevice(formValues)
     }
 

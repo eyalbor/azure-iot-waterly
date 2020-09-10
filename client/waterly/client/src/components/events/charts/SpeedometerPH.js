@@ -3,7 +3,7 @@ import ReactSpeedometer from "react-d3-speedometer"
 import Paper from '@material-ui/core/Paper';
 
 const SpeedometerPH = props => {
-    console.log(props)
+    //console.log(props)
     return (
     <div className="ui center aligned compact segment">
         <h4 class="ui header">Current Avarege Ph</h4>

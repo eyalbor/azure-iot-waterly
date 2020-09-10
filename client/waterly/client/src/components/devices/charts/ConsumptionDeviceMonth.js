@@ -31,7 +31,7 @@ import { strMonth } from '../../../actions/month'
 export default class ConsumptionDeviceMonth extends React.PureComponent {
   constructor(props) {
     super(props);
-    console.log("props" + props)
+    //console.log("props" + props)
     this.state = {data: null, devices: null}
   }
 
@@ -41,7 +41,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
 
   prepareDataForChart(data){
     this.setState({data})
-    console.log(data)
+    //console.log(data)
     const devicesSources = new Set();
     const copyData = JSON.parse(JSON.stringify(data))
     copyData.map(obj => {
@@ -58,7 +58,7 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
       //console.log(JSON.stringify(arr_tuple[0]))
     })
       //devicesSources.add({value: , name:})
-      console.log(devicesSources)
+      //console.log(devicesSources)
       this.setState({devices: Array.from(devicesSources)})
 
   }
@@ -70,13 +70,13 @@ export default class ConsumptionDeviceMonth extends React.PureComponent {
       this.prepareDataForChart(res.data)
     })
     .catch(err => {
-      console.log(err)
+      //console.log(err)
     })
   }
 
   render() {
     if(this.state.devices != null){
-      console.log(this.state)
+      //console.log(this.state)
       return (
         <Paper>
         <Chart
