@@ -16,7 +16,7 @@ using System.IO;
 
 namespace Waterly_iot_functions
 {
-    public static class Function1
+    public static class WaterlyWebFunctions
     {
         [FunctionName("get_devices_by_user_id")] 
         public static IActionResult getDevicesOfUser(
