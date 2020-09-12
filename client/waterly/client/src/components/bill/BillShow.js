@@ -84,7 +84,11 @@ class BillShow extends React.Component {
     renderCards(){
         //console.log(this.props.bills)
         this.props.bills.sort(function(a,b){
-            return b.month-a.month
+            let diff = b.year-a.year;
+            if(diff===0)
+                return b.month-a.month
+            else return diff;
+
         })
         return this.props.bills.map(bill => {
             return (     
