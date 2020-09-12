@@ -7,18 +7,18 @@
 import random
 import time
 import json
-import uuid
 from azure.iot.device import IoTHubDeviceClient, Message
 import numpy as np
+import threading
 
 # Define the JSON message to send to IoT Hub.
 
-MSG_TXT = '{{"id": "{uuid}",'\
-          '"device_id": "{device_id}",' \
+MSG_TXT = '{{"device_id": "{device_id}",' \
           '"timestamp": {timestamp},' \
           '"water_read": {water_read},' \
           '"ph": {ph},' \
-          '"water_pressure": {water_pressure}}}'
+          '"pressure": {pressure},' \
+          '"salinity": {salinity}}}'
 
 
 def iothub_client_init(device_connection_string):
@@ -44,11 +44,23 @@ def update_device_memory(json_msg, device_last_update_file_name):
         json.dump(json_msg, outfile)
 
 
+def message_listener(client, device_id):
+    while True:
+        message = client.receive_message()
+        print("\nMessage received from Azure to device {}: ".format(device_id))
+        print(message + "\n")
+
+
 def iothub_client_telemetry_sample_run(device_connection_string, device_id):
     device_last_update_file_name = '{device_id}_last_update.json'.format(device_id=device_id)
     try:
         client = iothub_client_init(device_connection_string)
-        print("IoT Hub device sending periodic messages, press Ctrl-C to exit" )
+        print("IoT Hub device sending periodic messages from " + device_id + ", press Ctrl-C to exit\n")
+
+        # open listener to device
+        message_listener_thread = threading.Thread(target=message_listener, args=(client, device_id))
+        message_listener_thread.daemon = True
+        message_listener_thread.start()
 
         last_water_read, last_read_timestamp = \
             init_last_water_read_and_last_read_timestamp(device_last_update_file_name)
@@ -57,24 +69,22 @@ def iothub_client_telemetry_sample_run(device_connection_string, device_id):
             # Build the message with simulated telemetry values.
             current_read_timestamp = time.time()
             current_water_read = last_water_read + (current_read_timestamp-last_read_timestamp) * 10 * random.random()
-            ph = np.random.normal(7, 0.4, 1)[0]
-            water_pressure = np.random.normal(4, 0.5, 1)[0]
-            msg_txt_formatted = MSG_TXT.format(uuid=uuid.uuid1(),
-                                               device_id=device_id,
+            ph = abs(np.random.normal(7, 0.4, 1)[0])
+            water_pressure = abs(np.random.normal(4, 0.5, 1)[0])
+            salinity = abs(np.random.normal(200, 40, 1)[0])
+            msg_txt_formatted = MSG_TXT.format(device_id=device_id,
                                                timestamp=int(current_read_timestamp),
                                                water_read=int(current_water_read),
                                                ph=ph,
-                                               water_pressure=water_pressure)
+                                               pressure=water_pressure,
+                                               salinity=salinity)
             message = Message(msg_txt_formatted)
 
-            # Add a custom application property to the message.
-            # An IoT hub can filter on these properties without access to the message body.
-
             # Send the message.
-            print("Sending message: {}".format(message))
+            print("\n{} sending message: {}\n".format(device_id, message))
             update_device_memory(json.loads(msg_txt_formatted), device_last_update_file_name)
             client.send_message(message)
-            print("Message successfully sent")
+            print("{}: Message successfully sent\n".format(device_id))
 
             last_read_timestamp = current_read_timestamp
             last_water_read = current_water_read

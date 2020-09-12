@@ -9,7 +9,6 @@ namespace Waterly_iot_functions
 {
     public static class Detector
     {
-
         public static Container events_container = Resources.cosmosClient.GetContainer("waterly_db", "water_table");
         public static Container alert_container = Resources.cosmosClient.GetContainer("waterly_db", "alerts_table");
         public static String LEAKAGE = "Possible leakage";
@@ -200,7 +199,6 @@ namespace Waterly_iot_functions
             }
         }
 
-
         // no more than one alert per week
         public static async Task suppressDetection(EventItem eventItem, string type, string userId, string evidence)
         {
@@ -213,11 +211,11 @@ namespace Waterly_iot_functions
             }
 
             var sqlQueryText = $"SELECT TOP 1 * FROM c WHERE c.device_id = '{eventItem.device_id}' AND " +
-                $"c.created_at >  {(now - TimeSpan.FromDays(1).TotalSeconds)} AND " +
+                $"c.created_at >  {(now - TimeSpan.FromDays(7).TotalSeconds)} AND " +
                 $"c.type = '{type}' order by c.created_at";
 
             logger.LogInformation("Checking older alerts...");
-            
+
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<AlertItem> queryResultSetIterator = Resources.alert_container.GetItemQueryIterator<AlertItem>(queryDefinition);
 
@@ -272,6 +270,6 @@ namespace Waterly_iot_functions
             EmailSender.sendMailNewAlert(alert, userId);
 
         }
-    
+   
     }
 }
