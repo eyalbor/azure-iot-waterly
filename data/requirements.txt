@@ -119,7 +119,7 @@ tqdm==4.46.0
 traitlets==4.3.3
 tweepy==3.8.0
 uritemplate==3.0.1
-urllib3==1.25.7
+urllib3==1.25.8
 virtualenv==20.0.9
 wcwidth==0.1.9
 webencodings==0.5.1
